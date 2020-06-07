@@ -4,11 +4,6 @@ Project 1 - Simple 2D Scene
 main.cpp
 */
 
-/*
-Luke Koppenheffer
-Textures Example Code
-*/
-
 #define GL_SILENCE_DEPRECATION
 
 #ifdef _WINDOWS
@@ -33,13 +28,15 @@ ShaderProgram program;
 
 /*-----Creating the matrix for the object, setting variables to transform said object, and initialize textureID-----*/
 //Creating matrices for all objects
-glm::mat4 viewMatrix, modelMatrix, UFOMatrix, projectionMatrix;
+glm::mat4 viewMatrix, modelMatrix, person2Matrix, UFOMatrix, projectionMatrix;
 /*-----Variables to be used in Update()-----*/
-float player_x = 0;
-float player_rotate = 0;
+float player_x = 0.0f;
+float player_rotate = 0.0f;
 // Variables for object 2, ufoBlue.png
-float ufo_x = 0;
-float ufo_rotate = 0;
+float ufo_x = 0.0f;
+float ufo_rotate = 0.0f;
+float ufoXScale = 0.5f;
+float ufoYScale = 0.5f;
 // Initializing a textureID's to be used in Render() 
 GLuint playerTextureID;
 GLuint UFOTextureID;
@@ -88,8 +85,10 @@ void Initialize() {
 	// using _textured loads a shader that can handle textured polygons
 	program.Load("shaders/vertex_textured.glsl", "shaders/fragment_textured.glsl");
 
+	/*-----INITIALIZING MATRIXES-----*/
 	viewMatrix = glm::mat4(1.0f);
 	modelMatrix = glm::mat4(1.0f);
+	person2Matrix = glm::mat4(1.0f);
 	UFOMatrix = glm::mat4(2.0f);
 	projectionMatrix = glm::ortho(-5.0f, 5.0f, -3.75f, 3.75f, -1.0f, 1.0f);
 
@@ -121,6 +120,8 @@ void ProcessInput() {
 }
 
 
+
+
 float lastTicks = 0.0f;
 // Perform transformations every frame
 void Update() {
@@ -132,21 +133,52 @@ void Update() {
 	/*-----Update variables that transform objects-----*/
 	player_x += 1.0f * deltaTime;
 	player_rotate += 90.0f * deltaTime;
-	ufo_x += 0.5f * deltaTime;
+	ufo_x += 0.1f * deltaTime;
 	ufo_rotate += 30.0f * deltaTime;
-
+	ufoXScale += 0.1f * deltaTime;
+	ufoYScale += 0.1f * deltaTime;
 
 	/*-----Perform transformations on the matrixes-----*/
+	// TRANSFORM PLAYER1 OBJECT
 	modelMatrix = glm::mat4(1.0f);
-	modelMatrix = glm::translate(modelMatrix, glm::vec3(player_x, 0.0f, 0.0f));
-	modelMatrix = glm::rotate(modelMatrix, glm::radians(player_rotate), glm::vec3(0.0f, 0.0f, 1.0f));
+	modelMatrix = glm::translate(modelMatrix, glm::vec3(player_x, -2.0f, 0.0f));
+	
+	// TRANSFORM PLAYER 2 OBJECT
+	person2Matrix = glm::mat4(1.0f);
+	person2Matrix = glm::translate(person2Matrix, glm::vec3(-player_x, -2.0f, 0.0f));
 
+	//modelMatrix = glm::rotate(modelMatrix, glm::radians(player_rotate), glm::vec3(0.0f, 0.0f, 1.0f));
+
+
+	// TRANSFORM UFO OBJECT
 	UFOMatrix = glm::mat4(1.0f);
-	UFOMatrix = glm::translate(UFOMatrix, glm::vec3(ufo_x, 0.0f, 0.0f));
 	UFOMatrix = glm::rotate(UFOMatrix, glm::radians(ufo_rotate), glm::vec3(0.0f, 0.0f, 1.0f));
-
+	UFOMatrix = glm::translate(UFOMatrix, glm::vec3(ufo_x, 0.0f, 0.0f));
+	UFOMatrix = glm::scale(UFOMatrix, glm::vec3(ufoXScale, ufoYScale, 1.0f));
 }
 
+
+/*-----DRAW OBJECTS-----*/
+void DrawPlayer1() {
+	// OBJECT 1, PLAYER
+	program.SetModelMatrix(modelMatrix);
+	glBindTexture(GL_TEXTURE_2D, playerTextureID);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void DrawPlayer2() {
+	// OBJECT 2, PLAYER2
+	program.SetModelMatrix(person2Matrix);
+	glBindTexture(GL_TEXTURE_2D, playerTextureID);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void DrawUFO() {
+	// OBJECT 3, UFO
+	program.SetModelMatrix(UFOMatrix);
+	glBindTexture(GL_TEXTURE_2D, UFOTextureID);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+}
 
 void Render() {
 	// Coordinates for vertices and texture UV coords
@@ -159,15 +191,11 @@ void Render() {
 	glVertexAttribPointer(program.texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
 	glEnableVertexAttribArray(program.texCoordAttribute);
 
-	/*-----SET OBJECTS HERE-----*/
-	// OBJECT 1, PLAYER
-	program.SetModelMatrix(modelMatrix);
-	glBindTexture(GL_TEXTURE_2D, playerTextureID);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-	// OBJECT 2, UFO
-	program.SetModelMatrix(UFOMatrix);
-	glBindTexture(GL_TEXTURE_2D, UFOTextureID);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	/*-----DRAW OBJECTS HERE-----*/
+	DrawPlayer1();
+	DrawPlayer2();
+	DrawUFO();
+
 
 	glDisableVertexAttribArray(program.positionAttribute);
 	glDisableVertexAttribArray(program.texCoordAttribute);
@@ -182,13 +210,13 @@ void Render() {
 
 }
 
-/*-----SHUTDOWN-----*/
+// SHUTDOWN
 void Shutdown() {
 	SDL_Quit();
 }
 
 
-/*-----MAIN LOOP-----*/
+// MAIN LOOP
 int main(int argc, char* argv[]) {
 	Initialize();
 
