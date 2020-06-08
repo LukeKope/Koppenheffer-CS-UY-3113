@@ -32,7 +32,7 @@ glm::mat4 viewMatrix, modelMatrix, person2Matrix, UFOMatrix, projectionMatrix;
 /*-----Variables to be used in Update()-----*/
 float player_x = 0.0f;
 float player_rotate = 0.0f;
-// Variables for object 2, ufoBlue.png
+// Variables for object 3, ufoBlue.png
 float ufo_x = 0.0f;
 float ufo_rotate = 0.0f;
 float ufoXScale = 0.5f;
@@ -191,6 +191,9 @@ void Render() {
 	glVertexAttribPointer(program.texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
 	glEnableVertexAttribArray(program.texCoordAttribute);
 
+	// Clear the background
+	glClear(GL_COLOR_BUFFER_BIT);
+
 	/*-----DRAW OBJECTS HERE-----*/
 	DrawPlayer1();
 	DrawPlayer2();
@@ -202,12 +205,6 @@ void Render() {
 
 	// Switch window which we always do last
 	SDL_GL_SwapWindow(displayWindow);
-
-	// Clear the background
-	glClear(GL_COLOR_BUFFER_BIT);
-
-
-
 }
 
 // SHUTDOWN
