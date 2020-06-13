@@ -25,16 +25,37 @@ SDL_Window* displayWindow;
 bool gameIsRunning = true;
 
 ShaderProgram program;
-glm::mat4 viewMatrix, modelMatrix, projectionMatrix;
+glm::mat4 viewMatrix, modelMatrix, rightPaddleMatrix, ballMatrix, projectionMatrix;
 
 // Player Movement Vars
 // Start at -4.5, 0, 0 (left side of the screen)
 glm::vec3 left_player_position = glm::vec3(-4.5f, 0.0f, 0.0f);
 glm::vec3 left_player_movement = glm::vec3(0.0f, 0.0f, 0.0f);
-float left_player_speed = 2.0f;
+float left_player_speed = 3.0f;
 
-// Initializing a playerTextureID to be used in Render() 
-GLuint playerTextureID;
+glm::vec3 right_player_position = glm::vec3(4.5f, 0.0f, 0.0f);
+glm::vec3 right_player_movement = glm::vec3(0.0f, 0.0f, 0.0f);
+float right_player_speed = 3.0f;
+
+glm::vec3 ball_position = glm::vec3(0.0f, 0.0f, 0.0f);
+glm::vec3 ball_movement = glm::vec3(0.0f, 0.0f, 0.0f);
+float ball_speed = 2.0f;
+float ball_x_direction = 1.0f;
+float ball_y_direction = 1.0f;
+
+// Set the vars for the bounding box of the paddles and ball
+float paddle_width = 1.0f;
+float paddle_height = 1.0f;
+float ball_width = 1.0f;
+float ball_height = 1.0f;
+
+// bool to keep track of when to start the game and move the ball
+bool startGame = false;
+bool endGame = false;
+
+
+// Initializing a paddleTextureID to be used in Render() 
+GLuint paddleTextureID;
 //Load texture function returns the id number of a texture given a file path
 GLuint LoadTexture(const char* filePath) {
 	int w, h, n;
@@ -79,6 +100,8 @@ void Initialize() {
 
 	viewMatrix = glm::mat4(1.0f);
 	modelMatrix = glm::mat4(1.0f);
+	rightPaddleMatrix = glm::mat4(1.0f);
+	ballMatrix = glm::mat4(1.0f);
 	projectionMatrix = glm::ortho(-5.0f, 5.0f, -3.75f, 3.75f, -1.0f, 1.0f);
 
 	program.SetProjectionMatrix(projectionMatrix);
@@ -95,13 +118,14 @@ void Initialize() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Load the texture in
-	playerTextureID = LoadTexture("ctg.png");
+	paddleTextureID = LoadTexture("paddle.png");
 }
 
 void ProcessInput() {
 
-	// If nothing is pressed, we don't want to go anywhere
+	// Reset the player movements
 	left_player_movement = glm::vec3(0);
+	right_player_movement = glm::vec3(0);
 
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {
@@ -113,9 +137,9 @@ void ProcessInput() {
 
 		case SDL_KEYDOWN:
 			switch (event.key.keysym.sym) {
-			
+
 			case SDLK_SPACE:
-				// Start the game (move the ball in the center)
+				startGame = true;
 				break;
 			}
 			break; // SDL_KEYDOWN
@@ -127,19 +151,36 @@ void ProcessInput() {
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
 
 	/*-----LEFT PADDLE CONTROLS-----*/
-	if (keys[SDL_SCANCODE_UP]) {
+	if (keys[SDL_SCANCODE_W]) {
 		// While keyboard is HELD down, move up
 		// Prevent player from going off screen
 		if (left_player_position.y + 0.5f < 3.75f) {
 			left_player_movement.y = 1.0f;
 		}
 	}
-	else if (keys[SDL_SCANCODE_DOWN]) {
+	else if (keys[SDL_SCANCODE_S]) {
 		// While keyboard is HELD down, move left
 		// Prevent player from going off screen
 		// The -0.5f accounts for the sprite being centered at the origin, i.e. it makes it so that the bottom of the sprite doesn't go off screen
 		if (left_player_position.y - 0.5f > -3.75f) {
 			left_player_movement.y = -1.0f;
+		}
+	}
+
+	/*-----RIGHT PADDLE CONTROLS-----*/
+	if (keys[SDL_SCANCODE_UP]) {
+		// While keyboard is HELD down, move up
+		// Prevent player from going off screen
+		if (right_player_position.y + 0.5f < 3.75f) {
+			right_player_movement.y = 1.0f;
+		}
+	}
+	else if (keys[SDL_SCANCODE_DOWN]) {
+		// While keyboard is HELD down, move left
+		// Prevent player from going off screen
+		// The -0.5f accounts for the sprite being centered at the origin, i.e. it makes it so that the bottom of the sprite doesn't go off screen
+		if (right_player_position.y - 0.5f > -3.75f) {
+			right_player_movement.y = -1.0f;
 		}
 	}
 
@@ -152,28 +193,106 @@ void ProcessInput() {
 }
 
 
+// Passing in the two matrices of the paddle position (left or right) and the ball
+// anytime the ball collides with a paddle or with the ceiling or floor, have the y direction of movement change
+bool checkCollision(glm::vec3& paddle, glm::vec3& ball) {
+	// X Distance = XDiff - (W1 + W2)/2
+	float xdiff = (fabs(paddle.x - ball.x) - (paddle_width + ball_width) / 2.0f);
+	// Y Distance = YDiff - (H1 + H2)/2
+	float ydiff = (fabs(paddle.y - ball.y) - (paddle_height + ball_height) / 2.0f);
+
+	// Colliding!
+	if (xdiff < 0 && ydiff < 0) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+
 float lastTicks = 0.0f;
 //We do all of our transformations in the update function. 
 //Every frame, we update the triangles position, rotation, or scale
 //Think of this like step in game maker
 void Update() {
-	float ticks = (float)SDL_GetTicks() / 1000.0f;
-	float deltaTime = ticks - lastTicks;
-	lastTicks = ticks;
+	// While the game is still playable (i.e. nobody has won yet)
+	if (!endGame) {
+		float ticks = (float)SDL_GetTicks() / 1000.0f;
+		float deltaTime = ticks - lastTicks;
+		lastTicks = ticks;
 
-	// Add (direction * units per second * elapsed time)
-	left_player_position += left_player_movement * left_player_speed * deltaTime;
-	modelMatrix = glm::mat4(1.0f);
-	modelMatrix = glm::translate(modelMatrix, left_player_position);
+
+		// Add (direction * units per second * elapsed time)
+		left_player_position += left_player_movement * left_player_speed * deltaTime;
+		modelMatrix = glm::mat4(1.0f);
+		modelMatrix = glm::translate(modelMatrix, left_player_position);
+
+		// Right player position updates
+		right_player_position += right_player_movement * right_player_speed * deltaTime;
+		rightPaddleMatrix = glm::mat4(1.0f);
+		rightPaddleMatrix = glm::translate(rightPaddleMatrix, right_player_position);
+
+
+		// Player has pressed space, start the game
+		if (startGame) {
+			ball_movement.x = 1.0f * ball_x_direction; // * ball_movement.x * ball_speed * deltaTime;
+			ball_movement.y = 1.0f * ball_y_direction; // *ball_movement.y* ball_speed* deltaTime;
+			ball_position += ball_movement * ball_speed * deltaTime;
+			ballMatrix = glm::mat4(1.0f);
+			ballMatrix = glm::translate(ballMatrix, ball_position);
+		}
+
+		bool leftPaddleCollision = checkCollision(left_player_position, ball_position);
+		bool rightPaddleCollision = checkCollision(right_player_position, ball_position);
+
+		if (leftPaddleCollision) {
+			// Have ball move towards right
+			ball_x_direction = 1.0f;
+			leftPaddleCollision = false;
+		}
+		if (rightPaddleCollision) {
+			// shift ball to the left
+			ball_x_direction = -1.0f;
+			rightPaddleCollision = false;
+		}
+
+		if (ball_position.y >= 3.25 || ball_position.y <= -3.25) {
+			//reverse ball_y_direction whenever it hits the ceiling or floor 
+			ball_y_direction *= -1.0f;
+		}
+
+		// Check for the ball hitting the wall
+		if (ball_position.x >= 4.5f || ball_position.x <= -4.5f) {
+			// End Game, ball has hit the wall
+			ball_movement.x = 0.0f;
+			endGame = true;
+		}
+	}
+}
+
+void DrawLeftPaddle() {
+	program.SetModelMatrix(modelMatrix);
+	glBindTexture(GL_TEXTURE_2D, paddleTextureID);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void DrawRightPaddle() {
+	program.SetModelMatrix(rightPaddleMatrix);
+	glBindTexture(GL_TEXTURE_2D, paddleTextureID);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void DrawBall() {
+	program.SetModelMatrix(ballMatrix);
+	glBindTexture(GL_TEXTURE_2D, paddleTextureID);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 // We need to update our rendiring so that it's using the coordinates of the vertices and the texture
 void Render() {
 	// Clear the background
 	glClear(GL_COLOR_BUFFER_BIT);
-
-	// Set the model matrix
-	program.SetModelMatrix(modelMatrix);
 
 	// Coordinates for vertices and texture UV coords
 	float vertices[] = { -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5 };
@@ -185,9 +304,10 @@ void Render() {
 	glVertexAttribPointer(program.texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
 	glEnableVertexAttribArray(program.texCoordAttribute);
 
-	// Use this texture then go draw those things
-	glBindTexture(GL_TEXTURE_2D, playerTextureID);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	// Draw Objects
+	DrawLeftPaddle();
+	DrawRightPaddle();
+	DrawBall();
 
 	glDisableVertexAttribArray(program.positionAttribute);
 	glDisableVertexAttribArray(program.texCoordAttribute);
