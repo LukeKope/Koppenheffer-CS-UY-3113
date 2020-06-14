@@ -39,13 +39,13 @@ float right_player_speed = 3.0f;
 
 glm::vec3 ball_position = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 ball_movement = glm::vec3(0.0f, 0.0f, 0.0f);
-float ball_speed = 2.0f;
+float ball_speed = 3.0f;
 float ball_x_direction = 1.0f;
 float ball_y_direction = 1.0f;
 
 // Set the vars for the bounding box of the paddles and ball
 float paddle_width = 1.0f;
-float paddle_height = 1.0f;
+float paddle_height = 1.5f;
 float ball_width = 1.0f;
 float ball_height = 1.0f;
 
@@ -154,15 +154,15 @@ void ProcessInput() {
 	if (keys[SDL_SCANCODE_W]) {
 		// While keyboard is HELD down, move up
 		// Prevent player from going off screen
-		if (left_player_position.y + 0.5f < 3.75f) {
+		if (left_player_position.y + 1.5f < 3.75f) {
 			left_player_movement.y = 1.0f;
 		}
 	}
 	else if (keys[SDL_SCANCODE_S]) {
 		// While keyboard is HELD down, move left
 		// Prevent player from going off screen
-		// The -0.5f accounts for the sprite being centered at the origin, i.e. it makes it so that the bottom of the sprite doesn't go off screen
-		if (left_player_position.y - 0.5f > -3.75f) {
+		// The -1.5f accounts for the sprite being centered at the origin, i.e. it makes it so that the bottom of the sprite doesn't go off screen
+		if (left_player_position.y - 1.5f > -3.75f) {
 			left_player_movement.y = -1.0f;
 		}
 	}
@@ -171,15 +171,15 @@ void ProcessInput() {
 	if (keys[SDL_SCANCODE_UP]) {
 		// While keyboard is HELD down, move up
 		// Prevent player from going off screen
-		if (right_player_position.y + 0.5f < 3.75f) {
+		if (right_player_position.y + 1.5f < 3.75f) {
 			right_player_movement.y = 1.0f;
 		}
 	}
 	else if (keys[SDL_SCANCODE_DOWN]) {
 		// While keyboard is HELD down, move left
 		// Prevent player from going off screen
-		// The -0.5f accounts for the sprite being centered at the origin, i.e. it makes it so that the bottom of the sprite doesn't go off screen
-		if (right_player_position.y - 0.5f > -3.75f) {
+		// The -1.5f accounts for the sprite being centered at the origin, i.e. it makes it so that the bottom of the sprite doesn't go off screen
+		if (right_player_position.y - 1.5f > -3.75f) {
 			right_player_movement.y = -1.0f;
 		}
 	}
@@ -284,6 +284,14 @@ void DrawRightPaddle() {
 }
 
 void DrawBall() {
+	// Specific set of vertices to control the size of the ball
+	float ball_vertices[] = { -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5 };
+
+	// Functions for saying use this list of vertices and coordinates
+	// Specifying that, when you draw the ball, use the ball vertices
+	glVertexAttribPointer(program.positionAttribute, 2, GL_FLOAT, false, 0, ball_vertices);
+	glEnableVertexAttribArray(program.positionAttribute);
+	
 	program.SetModelMatrix(ballMatrix);
 	glBindTexture(GL_TEXTURE_2D, paddleTextureID);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -295,11 +303,11 @@ void Render() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	// Coordinates for vertices and texture UV coords
-	float vertices[] = { -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5 };
+	float paddle_vertices[] = { -0.5, -1.5, 0.5, -1.5, 0.5, 1.5, -0.5, -1.5, 0.5, 1.5, -0.5, 1.5 };
 	float texCoords[] = { 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0 };
 
 	// Functions for saying use this list of vertices and coordinates
-	glVertexAttribPointer(program.positionAttribute, 2, GL_FLOAT, false, 0, vertices);
+	glVertexAttribPointer(program.positionAttribute, 2, GL_FLOAT, false, 0, paddle_vertices);
 	glEnableVertexAttribArray(program.positionAttribute);
 	glVertexAttribPointer(program.texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
 	glEnableVertexAttribArray(program.texCoordAttribute);
