@@ -1,0 +1,4 @@
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\CS3113_Course_Materials\CS3113-master\Templates\VisualStudioSDLProject\SDLProject\Debug\SDLProject.exe
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\CS3113_Course_Materials\CS3113-master\Templates\VisualStudioSDLProject\SDLProject\Debug\SDLProject.pdb
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Lecture Exercises\6.4-6.9_FixedTimeStep\Debug\SDLProject.exe
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Lecture Exercises\6.4-6.9_FixedTimeStep\Debug\SDLProject.pdb
