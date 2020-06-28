@@ -5,4 +5,4 @@
 Land on the green platform to win!
 
 *Controls*
-- Use the left and right arrow keys to move
+Use the left and right arrow keys to move

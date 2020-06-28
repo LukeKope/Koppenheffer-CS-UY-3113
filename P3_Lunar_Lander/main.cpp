@@ -187,26 +187,7 @@ void ProcessInput() {
 		case SDL_QUIT:
 		case SDL_WINDOWEVENT_CLOSE:
 			gameIsRunning = false;
-			break;
-
-		case SDL_KEYDOWN:
-			switch (event.key.keysym.sym) {
-			case SDLK_LEFT:
-				// Move the player left
-				break;
-
-			case SDLK_RIGHT:
-				// Move the player right
-				break;
-
-			case SDLK_SPACE:
-				// Jump (note we only check for a single press of the button)
-				if (state.player->collidedBottom) {
-
-				}
-				break;
-			}
-			break; // SDL_KEYDOWN
+			break;		
 		}
 	}
 
