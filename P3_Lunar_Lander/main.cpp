@@ -16,7 +16,7 @@
 
 #include "Entity.h"
 
-#define PLATFORM_COUNT 5
+#define PLATFORM_COUNT 24
 struct GameState {
 	Entity* player;
 	Entity* platforms;
@@ -95,19 +95,8 @@ void Initialize() {
 	// Setting acceleration to gravity (lowering gravity for assignment specs)
 	state.player->acceleration = glm::vec3(0.0, -0.81f, 0);
 	state.player->speed = 2.0f;
-	state.player->textureID = LoadTexture("george_0.png");
-
-	state.player->animRight = new int[4]{ 3, 7, 11, 15 };
-	state.player->animLeft = new int[4]{ 1, 5, 9, 13 };
-	state.player->animUp = new int[4]{ 2, 6, 10, 14 };
-	state.player->animDown = new int[4]{ 0, 4, 8, 12 };
-
-	state.player->animIndices = state.player->animRight;
-	state.player->animFrames = 4;
-	state.player->animIndex = 0;
-	state.player->animTime = 0;
-	state.player->animCols = 4;
-	state.player->animRows = 4;
+	state.player->textureID = LoadTexture("player.png");
+	
 
 	// When we checked collisions prior, the sprite appeared to be floating because the sprite actually had a bit of a border around it
 	// We fix this by setting the size of the player sprite
@@ -123,34 +112,74 @@ void Initialize() {
 	// Display "you lose"
 	state.text->animDown = new int[4]{ 6,7,8,9 };
 	state.text->animIndices = state.text->animUp;
-	state.text->animFrames = 3;
+	state.text->animFrames = 1;
 	state.text->animIndex = 0;
 	state.text->animTime = 0;
 	state.text->animCols = 16;
 	state.text->animRows = 16;
 
 	// Initialize platforms
-	state.platforms = new Entity[PLATFORM_COUNT];	
-	GLuint platformTextureID = LoadTexture("platformPack_tile001.png");
-	state.platforms[0].textureID = platformTextureID;
-	state.platforms[0].entityType = PLATFORM;
-	state.platforms[0].position = glm::vec3(-1, -3.25f, 0);
+	state.platforms = new Entity[PLATFORM_COUNT];
 
-	state.platforms[1].textureID = platformTextureID;
-	state.platforms[1].entityType = PLATFORM;
-	state.platforms[1].position = glm::vec3(0, -3.25f, 0);
+	// WINNING PLATFORMS
+	GLuint goodPlatformTextureID = LoadTexture("landing_platform.png");
+	state.platforms[0].textureID = goodPlatformTextureID;
+	state.platforms[0].entityType = VICTORY_PLATFORM;
+	state.platforms[0].position = glm::vec3(-3.5f, -3.25f, 0);
 
-	state.platforms[2].textureID = platformTextureID;
+	state.platforms[1].textureID = goodPlatformTextureID;
+	state.platforms[1].entityType = VICTORY_PLATFORM;
+	state.platforms[1].position = glm::vec3(-2.5f, -3.25f, 0);
+
+	// LOSING PLATFORMS
+	GLuint badPlatformTextureID = LoadTexture("bad_platform.png");
+	state.platforms[2].textureID = badPlatformTextureID;
 	state.platforms[2].entityType = PLATFORM;
-	state.platforms[2].position = glm::vec3(1, -3.25f, 0);
+	state.platforms[2].position = glm::vec3(-1.5f, -3.25f, 0);
 
-	state.platforms[3].textureID = platformTextureID;
+	state.platforms[3].textureID = badPlatformTextureID;
 	state.platforms[3].entityType = PLATFORM;
-	state.platforms[3].position = glm::vec3(2, -3.25f, 0);
+	state.platforms[3].position = glm::vec3(-0.5f, -3.25f, 0);
 
-	state.platforms[4].textureID = platformTextureID;
+	state.platforms[4].textureID = badPlatformTextureID;
 	state.platforms[4].entityType = PLATFORM;
-	state.platforms[4].position = glm::vec3(3, -3.25f, 0);
+	state.platforms[4].position = glm::vec3(0.5f, -3.25f, 0);
+
+	state.platforms[5].textureID = badPlatformTextureID;
+	state.platforms[5].entityType = PLATFORM;
+	state.platforms[5].position = glm::vec3(1.5f, -3.25f, 0);
+
+	state.platforms[6].textureID = badPlatformTextureID;
+	state.platforms[6].entityType = PLATFORM;
+	state.platforms[6].position = glm::vec3(2.5f, -3.25f, 0);
+
+	state.platforms[7].textureID = badPlatformTextureID;
+	state.platforms[7].entityType = PLATFORM;
+	state.platforms[7].position = glm::vec3(3.5f, -3.25f, 0);		
+
+	// Tiles for the right side wall going upward
+	for (int i = 0; i <8; i++) {
+		state.platforms[i+8].textureID = badPlatformTextureID;
+		state.platforms[i+8].entityType = PLATFORM;
+		state.platforms[i+8].position = glm::vec3(4.5, -3.25f+i, 0);
+	}
+
+	// Tiles for the left side wall going upward
+	for (int i = 0; i < 8; i++) {
+		state.platforms[i + 15].textureID = badPlatformTextureID;
+		state.platforms[i + 15].entityType = PLATFORM;
+		state.platforms[i + 15].position = glm::vec3(-4.5, -3.25f + i, 0);
+	}
+
+	// mid level platforms to avoid
+	state.platforms[22].textureID = badPlatformTextureID;
+	state.platforms[22].entityType = PLATFORM;
+	state.platforms[22].position = glm::vec3(0, 0.25f, 0);
+
+	state.platforms[23].textureID = badPlatformTextureID;
+	state.platforms[23].entityType = PLATFORM;
+	state.platforms[23].position = glm::vec3(1.0f, 0.25f, 0);
+		
 
 	for (int i = 0; i < PLATFORM_COUNT; i++) {
 		// Update the platforms one time so that their model matrix will update
@@ -252,7 +281,7 @@ void Update() {
 	accumulator = deltaTime;
 
 	// Once the player collides with a platform, check if it's the winning platform
-	if (state.player->collidedBottom || state.player->collidedLeft || state.player->collidedRight) {
+	if (state.player->collidedBottom || state.player->collidedTop || state.player->collidedLeft || state.player->collidedRight) {
 		if (state.player->lastCollision == PLATFORM) {
 			// PLAYER LOSES, display losing text
 			state.text->animIndices = state.player->animDown;
