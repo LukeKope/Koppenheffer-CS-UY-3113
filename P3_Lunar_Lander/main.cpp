@@ -93,30 +93,20 @@ void Initialize() {
 	state.player->position = glm::vec3(0, 4.0f, 0);
 	state.player->movement = glm::vec3(0);
 	// Setting acceleration to gravity (lowering gravity for assignment specs)
-	state.player->acceleration = glm::vec3(0.0, -0.81f, 0);
+	state.player->acceleration = glm::vec3(0.0, -0.40f, 0);
 	state.player->speed = 2.0f;
 	state.player->textureID = LoadTexture("player.png");
-	
+
 
 	// When we checked collisions prior, the sprite appeared to be floating because the sprite actually had a bit of a border around it
 	// We fix this by setting the size of the player sprite
-	state.player->height = 0.8f;
-	state.player->width = 0.8f;
+	state.player->height = 1.0f;
+	state.player->width = 1.0f;
 
 	state.player->jumpPower = 3.0f;
 
 	state.text = new Entity();
 	state.text->textureID = LoadTexture("font1.png");
-	// Display "you win"
-	state.text->animUp = new int[1]{ 50 };
-	// Display "you lose"
-	state.text->animDown = new int[4]{ 6,7,8,9 };
-	state.text->animIndices = state.text->animUp;
-	state.text->animFrames = 1;
-	state.text->animIndex = 0;
-	state.text->animTime = 0;
-	state.text->animCols = 16;
-	state.text->animRows = 16;
 
 	// Initialize platforms
 	state.platforms = new Entity[PLATFORM_COUNT];
@@ -155,13 +145,13 @@ void Initialize() {
 
 	state.platforms[7].textureID = badPlatformTextureID;
 	state.platforms[7].entityType = PLATFORM;
-	state.platforms[7].position = glm::vec3(3.5f, -3.25f, 0);		
+	state.platforms[7].position = glm::vec3(3.5f, -3.25f, 0);
 
 	// Tiles for the right side wall going upward
-	for (int i = 0; i <8; i++) {
-		state.platforms[i+8].textureID = badPlatformTextureID;
-		state.platforms[i+8].entityType = PLATFORM;
-		state.platforms[i+8].position = glm::vec3(4.5, -3.25f+i, 0);
+	for (int i = 0; i < 8; i++) {
+		state.platforms[i + 8].textureID = badPlatformTextureID;
+		state.platforms[i + 8].entityType = PLATFORM;
+		state.platforms[i + 8].position = glm::vec3(4.5, -3.25f + i, 0);
 	}
 
 	// Tiles for the left side wall going upward
@@ -179,7 +169,7 @@ void Initialize() {
 	state.platforms[23].textureID = badPlatformTextureID;
 	state.platforms[23].entityType = PLATFORM;
 	state.platforms[23].position = glm::vec3(1.0f, 0.25f, 0);
-		
+
 
 	for (int i = 0; i < PLATFORM_COUNT; i++) {
 		// Update the platforms one time so that their model matrix will update
@@ -221,7 +211,7 @@ void ProcessInput() {
 	}
 
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
-	
+
 	// Prevent movement once game is over
 	if (!state.gameOver) {
 		if (keys[SDL_SCANCODE_LEFT]) {
@@ -233,22 +223,16 @@ void ProcessInput() {
 			state.player->acceleration.x = 1.0f;
 		}
 		else {
-			// reset acceleration if player releases arrow key
+			// reset x acceleration if player releases arrow key, keep gravity
 			state.player->acceleration.x = 0.0f;
-			// Reset velocity once player hits the ground
-			if (state.player->collidedBottom) {
-				state.player->velocity.x = 0.0f;
-			}
-		}
-
-		if (glm::length(state.player->movement) > 1.0f) {
-			state.player->movement = glm::normalize(state.player->movement);
 		}
 	}
+	// if game is over...
 	else {
 		// Stop player movement once game is won
 		state.player->velocity.x = 0;
 		state.player->velocity.y = 0;
+		state.player->acceleration.y = 0.0f;
 	}
 
 }
@@ -284,18 +268,17 @@ void Update() {
 	if (state.player->collidedBottom || state.player->collidedTop || state.player->collidedLeft || state.player->collidedRight) {
 		if (state.player->lastCollision == PLATFORM) {
 			// PLAYER LOSES, display losing text
-			state.text->animIndices = state.player->animDown;
+			state.text->endGameText = "Mission Failed.";
 			state.gameOver = true;
 		}
 		else if (state.player->lastCollision == VICTORY_PLATFORM) {
 			// PLAYER WINS, display victory text
-			state.text->animIndices = state.player->animUp;
+			state.text->endGameText = "Mission Successful!";
 			state.gameOver = true;
 		}
 	}
 
 }
-
 
 void Render() {
 
@@ -309,7 +292,7 @@ void Render() {
 
 	// once player lands or loses, draw the text
 	if (state.gameOver) {
-		state.text->Render(&program);
+		state.text->DrawText(&program, state.text->textureID, state.text->endGameText, 0.5f, -0.25f, glm::vec3(-1.5f, -0.5f, 0));;
 	}
 
 	SDL_GL_SwapWindow(displayWindow);

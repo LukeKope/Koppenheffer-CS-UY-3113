@@ -10,6 +10,8 @@
 #include "glm/mat4x4.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "ShaderProgram.h"
+// Have to include vector for the draw text function
+#include <vector>
 
 
 enum EntityType { PLAYER, PLATFORM, VICTORY_PLATFORM };
@@ -19,6 +21,7 @@ public:
 
 	EntityType entityType;
 	EntityType lastCollision;
+	std::string endGameText;
 	glm::vec3 position;
 	glm::vec3 movement;
 	glm::vec3 acceleration;
@@ -64,4 +67,5 @@ public:
 	void Update(float deltaTime, Entity* platforms, int platformCount);
 	void Render(ShaderProgram* program);
 	void DrawSpriteFromTextureAtlas(ShaderProgram* program, GLuint textureID, int index);
+	void DrawText(ShaderProgram* program, GLuint fontTextureID, std::string text, float size, float spacing, glm::vec3 position);
 };
