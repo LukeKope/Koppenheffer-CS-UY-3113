@@ -20,12 +20,16 @@
 struct GameState {
 	Entity* player;
 	Entity* platforms;
+	Entity* text;
+	// Var to keep track of whether the player loses or wins so we know when to draw the end game text
+	bool gameOver = false;
 };
 
 GameState state;
 
 SDL_Window* displayWindow;
 bool gameIsRunning = true;
+
 
 ShaderProgram program;
 glm::mat4 viewMatrix, modelMatrix, projectionMatrix;
@@ -85,10 +89,11 @@ void Initialize() {
 
 	// Initialize Player
 	state.player = new Entity();
-	state.player->position = glm::vec3(0);
+	state.player->entityType = PLAYER;
+	state.player->position = glm::vec3(0, 4.0f, 0);
 	state.player->movement = glm::vec3(0);
-	// Setting acceleration to gravity
-	state.player->acceleration = glm::vec3(0, -9.81f, 0);
+	// Setting acceleration to gravity (lowering gravity for assignment specs)
+	state.player->acceleration = glm::vec3(0.0, -0.81f, 0);
 	state.player->speed = 2.0f;
 	state.player->textureID = LoadTexture("george_0.png");
 
@@ -103,7 +108,7 @@ void Initialize() {
 	state.player->animTime = 0;
 	state.player->animCols = 4;
 	state.player->animRows = 4;
-		
+
 	// When we checked collisions prior, the sprite appeared to be floating because the sprite actually had a bit of a border around it
 	// We fix this by setting the size of the player sprite
 	state.player->height = 0.8f;
@@ -111,23 +116,41 @@ void Initialize() {
 
 	state.player->jumpPower = 3.0f;
 
+	state.text = new Entity();
+	state.text->textureID = LoadTexture("font1.png");
+	// Display "you win"
+	state.text->animUp = new int[1]{ 50 };
+	// Display "you lose"
+	state.text->animDown = new int[4]{ 6,7,8,9 };
+	state.text->animIndices = state.text->animUp;
+	state.text->animFrames = 3;
+	state.text->animIndex = 0;
+	state.text->animTime = 0;
+	state.text->animCols = 16;
+	state.text->animRows = 16;
+
 	// Initialize platforms
-	state.platforms = new Entity[PLATFORM_COUNT];
+	state.platforms = new Entity[PLATFORM_COUNT];	
 	GLuint platformTextureID = LoadTexture("platformPack_tile001.png");
 	state.platforms[0].textureID = platformTextureID;
-	state.platforms[0].position = glm::vec3(-1,-3.25f, 0);
+	state.platforms[0].entityType = PLATFORM;
+	state.platforms[0].position = glm::vec3(-1, -3.25f, 0);
 
 	state.platforms[1].textureID = platformTextureID;
-	state.platforms[1].position = glm::vec3(0, -3.25f, 0);	
+	state.platforms[1].entityType = PLATFORM;
+	state.platforms[1].position = glm::vec3(0, -3.25f, 0);
 
 	state.platforms[2].textureID = platformTextureID;
+	state.platforms[2].entityType = PLATFORM;
 	state.platforms[2].position = glm::vec3(1, -3.25f, 0);
 
 	state.platforms[3].textureID = platformTextureID;
-	state.platforms[3].position = glm::vec3(-3, -3.25f, 0);
+	state.platforms[3].entityType = PLATFORM;
+	state.platforms[3].position = glm::vec3(2, -3.25f, 0);
 
 	state.platforms[4].textureID = platformTextureID;
-	state.platforms[4].position = glm::vec3(1.5, -2.25f, 0); 
+	state.platforms[4].entityType = PLATFORM;
+	state.platforms[4].position = glm::vec3(3, -3.25f, 0);
 
 	for (int i = 0; i < PLATFORM_COUNT; i++) {
 		// Update the platforms one time so that their model matrix will update
@@ -160,8 +183,7 @@ void ProcessInput() {
 			case SDLK_SPACE:
 				// Jump (note we only check for a single press of the button)
 				if (state.player->collidedBottom) {
-					// Can only jump if the player is colliding with something below them
-					state.player->jump = true; 
+
 				}
 				break;
 			}
@@ -170,19 +192,34 @@ void ProcessInput() {
 	}
 
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
+	
+	// Prevent movement once game is over
+	if (!state.gameOver) {
+		if (keys[SDL_SCANCODE_LEFT]) {
+			// Move with acceleration when holding down arrow key (modifying the acceleration vec3)
+			state.player->acceleration.x = -1.0f;
+		}
+		else if (keys[SDL_SCANCODE_RIGHT]) {
+			// Move with acceleration when holding down arrow key (modifying the acceleration vec3)
+			state.player->acceleration.x = 1.0f;
+		}
+		else {
+			// reset acceleration if player releases arrow key
+			state.player->acceleration.x = 0.0f;
+			// Reset velocity once player hits the ground
+			if (state.player->collidedBottom) {
+				state.player->velocity.x = 0.0f;
+			}
+		}
 
-	if (keys[SDL_SCANCODE_LEFT]) {
-		state.player->movement.x = -1.0f;
-		state.player->animIndices = state.player->animLeft;
+		if (glm::length(state.player->movement) > 1.0f) {
+			state.player->movement = glm::normalize(state.player->movement);
+		}
 	}
-	else if (keys[SDL_SCANCODE_RIGHT]) {
-		state.player->movement.x = 1.0f;
-		state.player->animIndices = state.player->animRight;
-	}
-
-
-	if (glm::length(state.player->movement) > 1.0f) {
-		state.player->movement = glm::normalize(state.player->movement);
+	else {
+		// Stop player movement once game is won
+		state.player->velocity.x = 0;
+		state.player->velocity.y = 0;
 	}
 
 }
@@ -191,7 +228,9 @@ void ProcessInput() {
 #define FIXED_TIMESTEP 0.0166666f
 float lastTicks = 0;
 float accumulator = 0.0f;
+
 void Update() {
+
 	float ticks = (float)SDL_GetTicks() / 1000.0f;
 	float deltaTime = ticks - lastTicks;
 	lastTicks = ticks;
@@ -203,7 +242,7 @@ void Update() {
 	while (deltaTime >= FIXED_TIMESTEP) {
 		// Update. Notice it's FIXED_TIMESTEP. Not deltaTime
 		// Updating Player and passing in platforms which we check collision with
-		state.player->Update(FIXED_TIMESTEP, state.platforms, PLATFORM_COUNT); 
+		state.player->Update(FIXED_TIMESTEP, state.platforms, PLATFORM_COUNT);
 
 		// If we have enough time to do another update, we're telling the player to Update
 		deltaTime -= FIXED_TIMESTEP;
@@ -211,17 +250,38 @@ void Update() {
 		// We're updating a consistent amount over time
 	}
 	accumulator = deltaTime;
+
+	// Once the player collides with a platform, check if it's the winning platform
+	if (state.player->collidedBottom || state.player->collidedLeft || state.player->collidedRight) {
+		if (state.player->lastCollision == PLATFORM) {
+			// PLAYER LOSES, display losing text
+			state.text->animIndices = state.player->animDown;
+			state.gameOver = true;
+		}
+		else if (state.player->lastCollision == VICTORY_PLATFORM) {
+			// PLAYER WINS, display victory text
+			state.text->animIndices = state.player->animUp;
+			state.gameOver = true;
+		}
+	}
+
 }
 
 
 void Render() {
+
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	for (int i = 0; i < PLATFORM_COUNT; i++) {
-		state.platforms[i].Render(&program); 
+		state.platforms[i].Render(&program);
 	}
 
 	state.player->Render(&program);
+
+	// once player lands or loses, draw the text
+	if (state.gameOver) {
+		state.text->Render(&program);
+	}
 
 	SDL_GL_SwapWindow(displayWindow);
 }

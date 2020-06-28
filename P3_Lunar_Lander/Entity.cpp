@@ -2,13 +2,14 @@
 
 Entity::Entity()
 {
+	entityType;
+	lastCollision;
 	// Vars to track player position and speed
 	position = glm::vec3(0);
 	speed = 0;
 	movement = glm::vec3(0);
 	acceleration = glm::vec3(0);
 	velocity = glm::vec3(0);
-
 	modelMatrix = glm::mat4(1.0f);
 }
 
@@ -20,6 +21,8 @@ bool Entity::CheckCollision(Entity* other) {
 	float y_dist = fabs(position.y - other->position.y) - ((height + other->height) / 2.0f);
 
 	if (x_dist < 0 && y_dist < 0) {
+		// Store the type of the lastCollision
+		lastCollision = other->entityType;
 		return true;
 	}
 	// Not colliding
@@ -39,7 +42,7 @@ void Entity::CheckCollisionsY(Entity* objects, int objectCount)
 				position.y -= penetrationY;
 				velocity.y = 0;
 				// We went up and collided with something, so top collision flag is true
-				collidedTop = true;				
+				collidedTop = true;
 			}
 			else if (velocity.y < 0) {
 				position.y += penetrationY;
@@ -52,7 +55,7 @@ void Entity::CheckCollisionsY(Entity* objects, int objectCount)
 }
 
 void Entity::CheckCollisionsX(Entity* objects, int objectCount)
-{	
+{
 	for (int i = 0; i < objectCount; i++)
 	{
 		Entity* object = &objects[i];
@@ -106,15 +109,6 @@ void Entity::Update(float deltaTime, Entity* platforms, int platformCount)
 		}
 	}
 
-	if (jump) {
-		jump = false;
-
-		velocity.y += jumpPower;
-	}
-
-	// Using the acceleration and velocity variables
-	// When our character starts moving, they have instant velocity
-	velocity.x = movement.x * speed;
 	// If we're accelerating, we're gonna keep adding to velocity with that acceleration
 	velocity += acceleration * deltaTime;
 
@@ -126,6 +120,7 @@ void Entity::Update(float deltaTime, Entity* platforms, int platformCount)
 
 	modelMatrix = glm::mat4(1.0f);
 	modelMatrix = glm::translate(modelMatrix, position);
+
 }
 
 void Entity::DrawSpriteFromTextureAtlas(ShaderProgram* program, GLuint textureID, int index)

@@ -11,8 +11,14 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "ShaderProgram.h"
 
+
+enum EntityType { PLAYER, PLATFORM, VICTORY_PLATFORM };
+
 class Entity {
-public:
+public:	
+
+	EntityType entityType;
+	EntityType lastCollision;
 	glm::vec3 position;
 	glm::vec3 movement;
 	glm::vec3 acceleration;
