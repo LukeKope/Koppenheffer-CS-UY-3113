@@ -12,7 +12,7 @@
 #include "ShaderProgram.h"
 
 enum EntityType {PLAYER, PLATFORM, ENEMY};
-enum AIType { WALKER, WAITANDGO };
+enum AIType { WALKER, WAITANDGO, JUMPER, PATROL };
 enum AIState { IDLE, WALKING, ATTACKING };
 
 class Entity {
@@ -70,4 +70,6 @@ public:
 	void AI(Entity* player);
 	void AIWalker();
 	void AIWaitAndGo(Entity* player);
+	void AIJumper();
+	void AIPatrol();
 };

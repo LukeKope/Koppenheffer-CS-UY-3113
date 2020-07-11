@@ -4,3 +4,5 @@ D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Lecture Exercises\6.4-
 D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Lecture Exercises\6.4-6.9_FixedTimeStep\Debug\SDLProject.pdb
 D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Lecture Exercises\8.5-8.9_AI\Debug\SDLProject.exe
 D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Lecture Exercises\8.5-8.9_AI\Debug\SDLProject.pdb
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P4_Rise_of_the_AI\Debug\SDLProject.exe
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P4_Rise_of_the_AI\Debug\SDLProject.pdb

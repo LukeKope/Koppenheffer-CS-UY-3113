@@ -1,6 +1,6 @@
 /*
 Luke Koppenheffer
-8.5-8.9 AI Example Code
+Project 4 - Rise of the AI
 main.cpp
 */
 
@@ -24,7 +24,7 @@ main.cpp
 #include "Entity.h"
 
 #define PLATFORM_COUNT 11
-#define ENEMY_COUNT 1
+#define ENEMY_COUNT 3
 struct GameState {
 	Entity* player;
 	Entity* platforms;
@@ -154,6 +154,23 @@ void Initialize() {
 	// Apply gravity to the AI
 	state.enemies[0].acceleration = glm::vec3(0, -9.81f, 0); 
 
+	// Jumper Enemy
+	state.enemies[1].entityType = ENEMY;
+	state.enemies[1].aiType = JUMPER;
+	state.enemies[1].textureID = enemyTextureID;
+	state.enemies[1].position = glm::vec3(3, -2.0f, 0);
+	state.enemies[1].jumpPower = 5;
+	state.enemies[1].acceleration = glm::vec3(0, -4.9f, 0);
+
+	// Patroller Enemy
+	state.enemies[2].entityType = ENEMY;
+	state.enemies[2].aiType = PATROL;
+	state.enemies[2].textureID = enemyTextureID;
+	state.enemies[2].position = glm::vec3(5, -2.0f, 0);
+	state.enemies[2].speed = 1;
+	state.enemies[2].acceleration = glm::vec3(0, -4.9f, 0);
+
+
 }
 
 void ProcessInput() {
@@ -229,6 +246,12 @@ void Update() {
 		for (int i = 0; i < ENEMY_COUNT; i++) {
 			// Updating Enemies and passing in the player entity and the platforms which we check collision with
 			state.enemies[i].Update(FIXED_TIMESTEP, state.player, state.platforms, PLATFORM_COUNT);
+		}
+
+		// Have enemy jump everytime he's on the floor
+		if (state.enemies[1].collidedBottom) {
+			// Can only jump if the enemy is colliding with something below them
+			state.enemies[1].jump = true;
 		}
 
 		// If we have enough time to do another update, we're telling the player to Update

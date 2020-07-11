@@ -105,6 +105,26 @@ void Entity::AIWaitAndGo(Entity* player) {
 	}
 }
 
+// Jumper enemy AI jumps whenever it collides with the floor
+void Entity::AIJumper() {
+	if (jump) {
+		jump = false;
+		velocity.y += jumpPower;
+	}
+}
+
+// Patrol enemy AI that walks to the left of the screen, then turns around
+void Entity::AIPatrol() {
+	// On left side of screen, turn and go right
+	if (position.x < -4.0f) {
+		movement = glm::vec3(1, 0, 0);
+	}
+	// On right side of the screen, turn around and go left
+	else if(position.x > 4.0f) {
+		movement = glm::vec3(-1, 0, 0);
+	}
+}
+
 void Entity::AI(Entity* player) {
 	switch (aiType) {
 
@@ -114,6 +134,14 @@ void Entity::AI(Entity* player) {
 
 		case WAITANDGO:
 			AIWaitAndGo(player);
+			break;
+
+		case JUMPER:
+			AIJumper();
+			break;
+
+		case PATROL:
+			AIPatrol();
 			break;
 	}
 }
@@ -157,9 +185,9 @@ void Entity::Update(float deltaTime, Entity* player, Entity* platforms, int plat
 		}
 	}
 
+	// Code that checks if the is on the ground, if so, jump
 	if (jump) {
 		jump = false;
-
 		velocity.y += jumpPower;
 	}
 
