@@ -2,6 +2,13 @@
 
 Entity::Entity()
 {
+	entityType;
+	lastCollision;
+	aiType;
+	aiState;
+	endGameText = "";
+	dead = false;
+	enemyCollidedWith;
 	// Vars to track player position and speed
 	position = glm::vec3(0);
 	speed = 0;
@@ -20,11 +27,46 @@ bool Entity::CheckCollision(Entity* other) {
 	float y_dist = fabs(position.y - other->position.y) - ((height + other->height) / 2.0f);
 
 	if (x_dist < 0 && y_dist < 0) {
+		// Store the type of the lastCollision
+		lastCollision = other->entityType;
 		return true;
 	}
 	// Not colliding
 	return false;
 }
+
+//void Entity::CheckEnemiesX(Entity* enemies, int numEnemies) {
+//	for (int i = 0; i < numEnemies; i++)
+//	{
+//		Entity* enemy = &enemies[i];
+//
+//	}
+//}
+
+//
+//void Entity::CheckEnemiesY(Entity* enemies, int numEnemies) {
+//
+//	for (int i = 0; i < numEnemies; i++)
+//	{
+//		Entity* enemy = &enemies[i];
+//		// Update the pointer to who we collided with
+//		enemyCollidedWith = enemy;
+//
+//		if (CheckCollision(enemy))
+//		{
+//			if (velocity.y > 0)
+//			{
+//				// We went up and collided with something, so top collision flag is true
+//				collidedTop = true;
+//			}
+//			else if (velocity.y < 0)
+//			{
+//				// We are moving down and collided with something below, bottom collision flag is true
+//				collidedBottom = true;
+//			}
+//		}
+//	}
+//}
 
 void Entity::CheckCollisionsY(Entity* objects, int objectCount)
 {
@@ -33,75 +75,109 @@ void Entity::CheckCollisionsY(Entity* objects, int objectCount)
 		Entity* object = &objects[i];
 		if (CheckCollision(object))
 		{
-			float ydist = fabs(position.y - object->position.y);
-			float penetrationY = fabs(ydist - (height / 2.0f) - (object->height / 2.0f));
-			if (velocity.y > 0) {
-				position.y -= penetrationY;
-				velocity.y = 0;
-				// We went up and collided with something, so top collision flag is true
-				collidedTop = true;				
+			// Platform collision checks
+			if (objects->entityType == PLATFORM) {
+				float ydist = fabs(position.y - object->position.y);
+				float penetrationY = fabs(ydist - (height / 2.0f) - (object->height / 2.0f));
+				if (velocity.y > 0) {
+					position.y -= penetrationY;
+					velocity.y = 0;
+					// We went up and collided with something, so top collision flag is true
+					collidedTop = true;
+				}
+				else if (velocity.y < 0) {
+					position.y += penetrationY;
+					velocity.y = 0;
+					// We are moving down and collided with something below, bottom collision flag is true
+					collidedBottom = true;
+				}
 			}
-			else if (velocity.y < 0) {
-				position.y += penetrationY;
-				velocity.y = 0;
-				// We are moving down and collided with something below, bottom collision flag is true
-				collidedBottom = true;
+			// Enemy collision checks
+			else if (objects->entityType == ENEMY) {
+				// Update the pointer to who we collided with
+				enemyCollidedWith = object;
+				if (velocity.y > 0) {
+					// we went up and collided with something, so top collision flag is true
+					collidedTop = true;
+				}
+				else if (velocity.y < 0) {
+					// we are moving down and collided with something below, bottom collision flag is true
+					collidedBottom = true;
+				}
 			}
 		}
 	}
 }
 
 void Entity::CheckCollisionsX(Entity* objects, int objectCount)
-{	
+{
 	for (int i = 0; i < objectCount; i++)
 	{
 		Entity* object = &objects[i];
 		if (CheckCollision(object))
 		{
-			float xdist = fabs(position.x - object->position.x);
-			float penetrationX = fabs(xdist - (width / 2.0f) - (object->width / 2.0f));
-			if (velocity.x > 0) {
-				position.x -= penetrationX;
-				velocity.x = 0;
-				// Collided with something while moving right
-				collidedRight = true;
+			// Collision checks for platform
+			if (objects->entityType == PLATFORM) {
+				float xdist = fabs(position.x - object->position.x);
+				float penetrationX = fabs(xdist - (width / 2.0f) - (object->width / 2.0f));
+				if (velocity.x > 0) {
+					position.x -= penetrationX;
+					velocity.x = 0;
+					// Collided with something while moving right
+					collidedRight = true;
+				}
+				else if (velocity.x < 0) {
+					position.x += penetrationX;
+					velocity.x = 0;
+					// Collided with something while moving left
+					collidedLeft = true;
+				}
 			}
-			else if (velocity.x < 0) {
-				position.x += penetrationX;
-				velocity.x = 0;
-				// Collided with something while moving left
-				collidedLeft = true;
+			// Enemy collision check
+			else if (objects->entityType == ENEMY) {
+				// Update the pointer to who we collided with
+				enemyCollidedWith = object;
+				if (velocity.x > 0)
+				{
+					collidedRight = true;
+				}
+				else if (velocity.x < 0)
+				{
+					collidedLeft = true;
+				}
 			}
+
 		}
+
 	}
 }
 
 //AI Functions
 void Entity::AIWalker() {
-	movement = glm::vec3(-1, 0, 0); 
+	movement = glm::vec3(-1, 0, 0);
 }
 
 void Entity::AIWaitAndGo(Entity* player) {
 	switch (aiState) {
 
-		case IDLE:
-			if (glm::distance(position, player->position) < 3.0f) {
-				aiState = WALKING;
-			}
-			break;
+	case IDLE:
+		if (glm::distance(position, player->position) < 3.0f) {
+			aiState = WALKING;
+		}
+		break;
 
-		case WALKING:
-			if (player->position.x < position.x) {
-				movement = glm::vec3(-1, 0, 0);
-			} 
-			else {
-				movement = glm::vec3(1, 0, 0);
-			}
-			
-			break;
+	case WALKING:
+		if (player->position.x < position.x) {
+			movement = glm::vec3(-1, 0, 0);
+		}
+		else {
+			movement = glm::vec3(1, 0, 0);
+		}
 
-		case ATTACKING:
-			break;
+		break;
+
+	case ATTACKING:
+		break;
 	}
 }
 
@@ -120,7 +196,7 @@ void Entity::AIPatrol() {
 		movement = glm::vec3(1, 0, 0);
 	}
 	// On right side of the screen, turn around and go left
-	else if(position.x > 4.0f) {
+	else if (position.x > 4.0f) {
 		movement = glm::vec3(-1, 0, 0);
 	}
 }
@@ -128,27 +204,27 @@ void Entity::AIPatrol() {
 void Entity::AI(Entity* player) {
 	switch (aiType) {
 
-		case WALKER:
-			AIWalker();
-			break;
+	case WALKER:
+		AIWalker();
+		break;
 
-		case WAITANDGO:
-			AIWaitAndGo(player);
-			break;
+	case WAITANDGO:
+		AIWaitAndGo(player);
+		break;
 
-		case JUMPER:
-			AIJumper();
-			break;
+	case JUMPER:
+		AIJumper();
+		break;
 
-		case PATROL:
-			AIPatrol();
-			break;
+	case PATROL:
+		AIPatrol();
+		break;
 	}
 }
 
 
 
-void Entity::Update(float deltaTime, Entity* player, Entity* platforms, int platformCount)
+void Entity::Update(float deltaTime, Entity* player, Entity* platforms, Entity* enemies, int platformCount, int enemyCount)
 {
 	// if object is not active, do not update it. Exit the update function
 	if (isActive == false) return;
@@ -158,6 +234,9 @@ void Entity::Update(float deltaTime, Entity* player, Entity* platforms, int plat
 	collidedBottom = false;
 	collidedLeft = false;
 	collidedRight = false;
+	// Reset enemy collided with every frame
+	enemyCollidedWith = nullptr;
+
 
 	// If they're an enemy, call the AI function to execute the AI behavior
 	if (entityType == ENEMY) {
@@ -185,10 +264,12 @@ void Entity::Update(float deltaTime, Entity* player, Entity* platforms, int plat
 		}
 	}
 
-	// Code that checks if the is on the ground, if so, jump
-	if (jump) {
-		jump = false;
-		velocity.y += jumpPower;
+	// Allow player to jump
+	if (entityType == PLAYER) {
+		if (jump) {
+			jump = false;
+			velocity.y += jumpPower;
+		}
 	}
 
 	// Using the acceleration and velocity variables
@@ -204,10 +285,16 @@ void Entity::Update(float deltaTime, Entity* player, Entity* platforms, int plat
 	CheckCollisionsX(platforms, platformCount);	// Fix if needed
 
 	/*-----NEED TO CHECK COLLISIONS WITH THE PLAYER AND THE AI-----*/
+	// Only check for collisions with an enemy if you're updating the player (otherwise, the jumper AI will jump infinitely because collidedBottom is always true from calling these checks on itself)
+	if (entityType == PLAYER) {
+		CheckCollisionsY(enemies, enemyCount); // Update proper collision flags, update pointer to Enemy we collided with
+		CheckCollisionsX(enemies, enemyCount); // Update proper collision flags, update pointer to Enemy we collided with
+	}
 
 
 	modelMatrix = glm::mat4(1.0f);
 	modelMatrix = glm::translate(modelMatrix, position);
+
 }
 
 void Entity::DrawSpriteFromTextureAtlas(ShaderProgram* program, GLuint textureID, int index)
@@ -236,6 +323,52 @@ void Entity::DrawSpriteFromTextureAtlas(ShaderProgram* program, GLuint textureID
 	glDisableVertexAttribArray(program->positionAttribute);
 	glDisableVertexAttribArray(program->texCoordAttribute);
 }
+
+
+void Entity::DrawText(ShaderProgram* program, GLuint fontTextureID, std::string text, float size, float spacing, glm::vec3 position)
+{
+	float width = 1.0f / 16.0f;
+	float height = 1.0f / 16.0f;
+	std::vector<float> vertices;
+	std::vector<float> texCoords;
+	for (int i = 0; i < text.size(); i++) {
+		int index = (int)text[i];
+		float offset = (size + spacing) * i;
+		float u = (float)(index % 16) / 16.0f;
+		float v = (float)(index / 16) / 16.0f;
+
+		vertices.insert(vertices.end(), {
+	offset + (-0.5f * size), 0.5f * size,
+	offset + (-0.5f * size), -0.5f * size,
+	offset + (0.5f * size), 0.5f * size,
+	offset + (0.5f * size), -0.5f * size,
+	offset + (0.5f * size), 0.5f * size,
+	offset + (-0.5f * size), -0.5f * size,
+			});
+		texCoords.insert(texCoords.end(), {
+		u, v,
+		u, v + height,
+		u + width, v,
+		u + width, v + height,
+		u + width, v,
+		u, v + height,
+			});
+	} // end of for loop
+
+	glm::mat4 modelMatrix = glm::mat4(1.0f);
+	modelMatrix = glm::translate(modelMatrix, position);
+	program->SetModelMatrix(modelMatrix);
+	glUseProgram(program->programID);
+	glVertexAttribPointer(program->positionAttribute, 2, GL_FLOAT, false, 0, vertices.data());
+	glEnableVertexAttribArray(program->positionAttribute);
+	glVertexAttribPointer(program->texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords.data());
+	glEnableVertexAttribArray(program->texCoordAttribute);
+	glBindTexture(GL_TEXTURE_2D, fontTextureID);
+	glDrawArrays(GL_TRIANGLES, 0, (int)(text.size() * 6));
+	glDisableVertexAttribArray(program->positionAttribute);
+	glDisableVertexAttribArray(program->texCoordAttribute);
+}
+
 
 void Entity::Render(ShaderProgram* program) {
 

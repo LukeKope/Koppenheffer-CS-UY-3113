@@ -29,6 +29,11 @@ struct GameState {
 	Entity* player;
 	Entity* platforms;
 	Entity* enemies;
+	// Decide whether to display the winning text or the losing text depending on the conditions
+	Entity* text;
+	// Keep track of when the game ends (either player defeated all the enemies or the player died)
+	bool gameOver;
+	int totEnemies;
 };
 
 GameState state;
@@ -92,6 +97,13 @@ void Initialize() {
 
 	// Initialize Game Objects
 
+	// track how many enemies player has defeated
+	state.totEnemies = 0;
+	state.gameOver = false;
+
+	state.text = new Entity();
+	state.text->textureID = LoadTexture("font1.png");
+
 	// Initialize Player
 	state.player = new Entity();
 	// Setting entity Type so we can know what type of object this is when we check for collisions
@@ -99,8 +111,9 @@ void Initialize() {
 	state.player->position = glm::vec3(-4, -1, 0);
 	state.player->movement = glm::vec3(0);
 	// Setting acceleration to gravity
-	state.player->acceleration = glm::vec3(0, -9.81f, 0);
-	state.player->speed = 2.0f;
+	state.player->acceleration = glm::vec3(0, -19.62f, 0);
+	state.player->jumpPower = 8.0f;
+	state.player->speed = 3.0f;
 	state.player->textureID = LoadTexture("george_0.png");
 
 	state.player->animRight = new int[4]{ 3, 7, 11, 15 };
@@ -118,9 +131,9 @@ void Initialize() {
 	// When we checked collisions prior, the sprite appeared to be floating because the sprite actually had a bit of a border around it
 	// We fix this by setting the size of the player sprite
 	state.player->height = 0.8f;
-	state.player->width = 0.8f;
+	state.player->width = 0.5f;
 
-	state.player->jumpPower = 3.0f;
+	
 
 	// Initialize platforms
 	state.platforms = new Entity[PLATFORM_COUNT];
@@ -135,11 +148,13 @@ void Initialize() {
 
 	for (int i = 0; i < PLATFORM_COUNT; i++) {
 		// Update the platforms one time so that their model matrix will update
-		state.platforms[i].Update(0, NULL, NULL, 0);
+		state.platforms[i].Update(0, NULL, NULL, NULL, 0, 0);
 	}
 
 	//Enemy Initialization
-	state.enemies = new Entity[ENEMY_COUNT];	
+	state.enemies = new Entity[ENEMY_COUNT];
+	// Add more of a buffer for enemy collisions to feel more fair to the player
+	state.enemies->width = 0.8f;
 	GLuint enemyTextureID = LoadTexture("ctg.png");
 
 	// Setting entity Type so we can know what type of object this is when we check for collisions
@@ -152,14 +167,14 @@ void Initialize() {
 	state.enemies[0].position = glm::vec3(4, -2.0f, 0);
 	state.enemies[0].speed = 1;
 	// Apply gravity to the AI
-	state.enemies[0].acceleration = glm::vec3(0, -9.81f, 0); 
+	state.enemies[0].acceleration = glm::vec3(0, -9.81f, 0);
 
 	// Jumper Enemy
 	state.enemies[1].entityType = ENEMY;
 	state.enemies[1].aiType = JUMPER;
 	state.enemies[1].textureID = enemyTextureID;
 	state.enemies[1].position = glm::vec3(3, -2.0f, 0);
-	state.enemies[1].jumpPower = 5;
+	state.enemies[1].jumpPower = 2;
 	state.enemies[1].acceleration = glm::vec3(0, -4.9f, 0);
 
 	// Patroller Enemy
@@ -169,8 +184,6 @@ void Initialize() {
 	state.enemies[2].position = glm::vec3(5, -2.0f, 0);
 	state.enemies[2].speed = 1;
 	state.enemies[2].acceleration = glm::vec3(0, -4.9f, 0);
-
-
 }
 
 void ProcessInput() {
@@ -187,13 +200,6 @@ void ProcessInput() {
 
 		case SDL_KEYDOWN:
 			switch (event.key.keysym.sym) {
-			case SDLK_LEFT:
-				// Move the player left
-				break;
-
-			case SDLK_RIGHT:
-				// Move the player right
-				break;
 
 			case SDLK_SPACE:
 				// Jump (note we only check for a single press of the button)
@@ -209,18 +215,20 @@ void ProcessInput() {
 
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
 
-	if (keys[SDL_SCANCODE_LEFT]) {
-		state.player->movement.x = -1.0f;
-		state.player->animIndices = state.player->animLeft;
-	}
-	else if (keys[SDL_SCANCODE_RIGHT]) {
-		state.player->movement.x = 1.0f;
-		state.player->animIndices = state.player->animRight;
-	}
+	// Don't process input on game end
+	if (!state.gameOver) {
+		if (keys[SDL_SCANCODE_LEFT]) {
+			state.player->movement.x = -1.0f;
+			state.player->animIndices = state.player->animLeft;
+		}
+		else if (keys[SDL_SCANCODE_RIGHT]) {
+			state.player->movement.x = 1.0f;
+			state.player->animIndices = state.player->animRight;
+		}
 
-
-	if (glm::length(state.player->movement) > 1.0f) {
-		state.player->movement = glm::normalize(state.player->movement);
+		if (glm::length(state.player->movement) > 1.0f) {
+			state.player->movement = glm::normalize(state.player->movement);
+		}
 	}
 
 }
@@ -230,36 +238,83 @@ void ProcessInput() {
 float lastTicks = 0;
 float accumulator = 0.0f;
 void Update() {
-	float ticks = (float)SDL_GetTicks() / 1000.0f;
-	float deltaTime = ticks - lastTicks;
-	lastTicks = ticks;
-	deltaTime += accumulator;
-	if (deltaTime < FIXED_TIMESTEP) {
+
+	// Only update movements if the game isn't over
+	if (!state.gameOver) {
+
+		float ticks = (float)SDL_GetTicks() / 1000.0f;
+		float deltaTime = ticks - lastTicks;
+		lastTicks = ticks;
+		deltaTime += accumulator;
+		if (deltaTime < FIXED_TIMESTEP) {
+			accumulator = deltaTime;
+			return;
+		}
+		while (deltaTime >= FIXED_TIMESTEP) {
+			// Update. Notice it's FIXED_TIMESTEP. Not deltaTime
+			// Updating Player and passing in the player entity, the platforms, and enemies which we check collision with
+			state.player->Update(FIXED_TIMESTEP, state.player, state.platforms, state.enemies, PLATFORM_COUNT, ENEMY_COUNT);
+
+			for (int i = 0; i < ENEMY_COUNT; i++) {
+				// Updating Enemies and passing in the player entity, the platforms, and enemies which we check collision with
+				state.enemies[i].Update(FIXED_TIMESTEP, state.player, state.platforms, state.enemies, PLATFORM_COUNT, ENEMY_COUNT);
+			}
+
+			// Have enemy jump everytime he's on the floor
+			if (state.enemies[1].collidedBottom) {
+				// Can only jump if the enemy is colliding with something below them
+				state.enemies[1].jump = true;
+			}
+
+			// If we have enough time to do another update, we're telling the player to Update
+			deltaTime -= FIXED_TIMESTEP;
+
+			// We're updating a consistent amount over time
+		}
 		accumulator = deltaTime;
-		return;
-	}
-	while (deltaTime >= FIXED_TIMESTEP) {
-		// Update. Notice it's FIXED_TIMESTEP. Not deltaTime
-		// Updating Player and passing in the player entity and the platforms which we check collision with
-		state.player->Update(FIXED_TIMESTEP, state.player, state.platforms, PLATFORM_COUNT);
 
-		for (int i = 0; i < ENEMY_COUNT; i++) {
-			// Updating Enemies and passing in the player entity and the platforms which we check collision with
-			state.enemies[i].Update(FIXED_TIMESTEP, state.player, state.platforms, PLATFORM_COUNT);
+	}
+
+	// If player collides with an enemy who is NOT dead
+	if (state.player->enemyCollidedWith != nullptr && !state.player->enemyCollidedWith->dead && state.player->lastCollision == ENEMY) {
+		// If the player jumped and killed an enemy, remove that enemy
+		if (state.player->collidedBottom && state.player->velocity.y < 0) {
+			// Set the enemy we collide with to dead, do not render it
+			state.player->enemyCollidedWith->dead = true;
+
+		}
+		// If player collided with an enemy without jumping on them
+		else if (state.player->collidedLeft || state.player->collidedRight || state.player->collidedTop) {
+			// Player did not jump on the enemy, game over
+			state.player->dead = true;
 		}
 
-		// Have enemy jump everytime he's on the floor
-		if (state.enemies[1].collidedBottom) {
-			// Can only jump if the enemy is colliding with something below them
-			state.enemies[1].jump = true;
-		}
-
-		// If we have enough time to do another update, we're telling the player to Update
-		deltaTime -= FIXED_TIMESTEP;
-
-		// We're updating a consistent amount over time
 	}
-	accumulator = deltaTime;
+
+	// Check for how many alive enemies there are
+	for (int i = 0; i < ENEMY_COUNT; i++) {
+		if (state.enemies[i].dead) {
+			state.totEnemies += 1;
+		}
+	}
+	// if there are some enemies left, reset the counter and check again
+	if (state.totEnemies < ENEMY_COUNT) {
+		state.totEnemies = 0;
+	}
+
+	if (state.totEnemies == ENEMY_COUNT) {
+		// Player won, display victory text!
+		state.text->endGameText = "You win!";
+		state.gameOver = true;
+
+	}
+	if (state.player->dead) {
+		// Player got hit
+		state.text->endGameText = "You lose!";
+		state.gameOver = true;
+
+	}
+
 }
 
 
@@ -271,10 +326,18 @@ void Render() {
 	}
 
 	for (int i = 0; i < ENEMY_COUNT; i++) {
-		state.enemies[i].Render(&program);
+		// Only draw the enemy if it hasn't been killed by the player
+		if (!state.enemies[i].dead) {
+			state.enemies[i].Render(&program);
+		}
 	}
 
 	state.player->Render(&program);
+
+	// If either end game condition is met, display the ending text
+	if (state.gameOver) {
+		state.text->DrawText(&program, state.text->textureID, state.text->endGameText, 0.5f, -0.25f, glm::vec3(-1.5f, -0.5f, 0));
+	}
 
 	SDL_GL_SwapWindow(displayWindow);
 }
