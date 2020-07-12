@@ -173,7 +173,7 @@ void Initialize() {
 	state.enemies[1].entityType = ENEMY;
 	state.enemies[1].aiType = JUMPER;
 	state.enemies[1].textureID = enemyTextureID;
-	state.enemies[1].position = glm::vec3(3, -2.0f, 0);
+	state.enemies[1].position = glm::vec3(0, -2.0f, 0);
 	state.enemies[1].jumpPower = 2;
 	state.enemies[1].acceleration = glm::vec3(0, -4.9f, 0);
 

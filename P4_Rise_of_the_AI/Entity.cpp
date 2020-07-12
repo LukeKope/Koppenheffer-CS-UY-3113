@@ -35,39 +35,6 @@ bool Entity::CheckCollision(Entity* other) {
 	return false;
 }
 
-//void Entity::CheckEnemiesX(Entity* enemies, int numEnemies) {
-//	for (int i = 0; i < numEnemies; i++)
-//	{
-//		Entity* enemy = &enemies[i];
-//
-//	}
-//}
-
-//
-//void Entity::CheckEnemiesY(Entity* enemies, int numEnemies) {
-//
-//	for (int i = 0; i < numEnemies; i++)
-//	{
-//		Entity* enemy = &enemies[i];
-//		// Update the pointer to who we collided with
-//		enemyCollidedWith = enemy;
-//
-//		if (CheckCollision(enemy))
-//		{
-//			if (velocity.y > 0)
-//			{
-//				// We went up and collided with something, so top collision flag is true
-//				collidedTop = true;
-//			}
-//			else if (velocity.y < 0)
-//			{
-//				// We are moving down and collided with something below, bottom collision flag is true
-//				collidedBottom = true;
-//			}
-//		}
-//	}
-//}
-
 void Entity::CheckCollisionsY(Entity* objects, int objectCount)
 {
 	for (int i = 0; i < objectCount; i++)
@@ -96,12 +63,12 @@ void Entity::CheckCollisionsY(Entity* objects, int objectCount)
 			else if (objects->entityType == ENEMY) {
 				// Update the pointer to who we collided with
 				enemyCollidedWith = object;
-				if (velocity.y > 0) {
-					// we went up and collided with something, so top collision flag is true
+				if (object->position.y > position.y) {
+					// Enemy was above player, player got jumped on
 					collidedTop = true;
 				}
-				else if (velocity.y < 0) {
-					// we are moving down and collided with something below, bottom collision flag is true
+				else if (object->position.y < position.y) {
+					// Enemy was below player, player jumped on enemy
 					collidedBottom = true;
 				}
 			}
@@ -137,11 +104,13 @@ void Entity::CheckCollisionsX(Entity* objects, int objectCount)
 			else if (objects->entityType == ENEMY) {
 				// Update the pointer to who we collided with
 				enemyCollidedWith = object;
-				if (velocity.x > 0)
+				// Enemy is to the right of the player during collision
+				if (object->position.x > position.x)
 				{
 					collidedRight = true;
 				}
-				else if (velocity.x < 0)
+				// Enemy is to the left of the player during collision
+				else if (object->position.x < position.x)
 				{
 					collidedLeft = true;
 				}
@@ -167,10 +136,11 @@ void Entity::AIWaitAndGo(Entity* player) {
 		break;
 
 	case WALKING:
-		if (player->position.x < position.x) {
+		// Provide a bit of a buffer so the enemy isn't right on top of you
+		if (player->position.x < position.x - 0.5f) {
 			movement = glm::vec3(-1, 0, 0);
 		}
-		else {
+		else if (player->position.x > position.x + 0.5f) {
 			movement = glm::vec3(1, 0, 0);
 		}
 
@@ -235,7 +205,7 @@ void Entity::Update(float deltaTime, Entity* player, Entity* platforms, Entity* 
 	collidedLeft = false;
 	collidedRight = false;
 	// Reset enemy collided with every frame
-	enemyCollidedWith = nullptr;
+	// enemyCollidedWith = nullptr;
 
 
 	// If they're an enemy, call the AI function to execute the AI behavior
