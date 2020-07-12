@@ -12,5 +12,5 @@
 3. Wait and Go/Follower - This enemy will wait until you are in their sites, then continue to follow you around the stage
 
 *Controls*
-- Move left and right with **A** and **D**
+- Move left and right with **Left Arrow** and **Right Arrow Keys**
 - Jump with **Spacebar**
