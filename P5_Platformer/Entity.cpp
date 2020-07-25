@@ -182,8 +182,6 @@ void Entity::AI(Entity* player) {
 	}
 }
 
-
-
 void Entity::Update(float deltaTime, Entity* player, Entity* objects, int objectCount, Map* map)
 {
 	// if object is not active, do not update it. Exit the update function
@@ -244,6 +242,8 @@ void Entity::Update(float deltaTime, Entity* player, Entity* objects, int object
 
 	/*-----NEED TO CHECK COLLISIONS WITH THE PLAYER AND THE AI-----*/
 
+
+	
 
 	modelMatrix = glm::mat4(1.0f);
 	modelMatrix = glm::translate(modelMatrix, position);

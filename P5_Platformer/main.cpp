@@ -38,6 +38,8 @@ Scene* currentScene;
 // Hold an array of levels and we can point to the current level
 Scene* sceneList[4];
 
+int playerLives = 3;
+
 void SwitchToScene(Scene* scene) {
 	currentScene = scene;
 	currentScene->Initialize();
@@ -103,7 +105,7 @@ void ProcessInput() {
 				break;
 
 			case SDLK_SPACE:
-				if (currentScene != sceneList[0]) {
+				if (currentScene != sceneList[0] && playerLives != 0) {
 					// Jump (note we only check for a single press of the button)
 					if (currentScene->state.player->collidedBottom) {
 						// Can only jump if the player is colliding with something below them
@@ -111,7 +113,7 @@ void ProcessInput() {
 					}
 				}
 				break;
-			// Allow player to advance to the first level from the menu
+				// Allow player to advance to the first level from the menu
 			case SDLK_RETURN:
 				if (currentScene == sceneList[0]) {
 					// This sends a notice to main that we want to change levels to level 1
@@ -126,8 +128,8 @@ void ProcessInput() {
 
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
 
-	// Do not process player input on the menu screen
-	if (currentScene != sceneList[0]) {
+	// Do not process player input on the menu screen and do not allow the player to move if they lose
+	if (currentScene != sceneList[0] && playerLives != 0) {
 
 		if (keys[SDL_SCANCODE_LEFT]) {
 			currentScene->state.player->movement.x = -1.0f;
@@ -184,6 +186,16 @@ void Update() {
 		}
 	}
 
+	// Constantly check for the player falling off screen and put them back to the start if they fall
+	if (currentScene != sceneList[0]) {
+		// If the player falls off the screen, deduct a life
+		if (currentScene->state.player->position.y < -10.00f) {
+			playerLives--;
+			// Reset the player position to the start of the level if they fall off the map
+			currentScene->state.player->position = glm::vec3(5, 0, 0);
+		}
+	}
+
 }
 
 
@@ -195,6 +207,23 @@ void Render() {
 
 	// Render the current scene
 	currentScene->Render(&program);
+
+	if (currentScene != sceneList[0]) {
+		// Draw lives in top right of every screen
+		if (currentScene->state.player->position.x > 5) {
+			Util::DrawText(&program, Util::LoadTexture("font1.png"), "Lives: " + std::to_string(playerLives), 0.5, 0.05, glm::vec3(currentScene->state.player->position.x, -0.5, 0));
+		}
+		else {
+			Util::DrawText(&program, Util::LoadTexture("font1.png"), "Lives: " + std::to_string(playerLives), 0.5, 0.05, glm::vec3(5.0f, -0.5, 0));
+		}
+
+		// Draw you lose when you lose
+		if (playerLives == 0) {
+			Util::DrawText(&program, Util::LoadTexture("font1.png"), "You lose", 0.5, 0.05, glm::vec3(2.5, -2.5, 0));
+		}
+	}
+
+
 
 	SDL_GL_SwapWindow(displayWindow);
 }

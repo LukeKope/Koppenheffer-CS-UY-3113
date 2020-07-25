@@ -31,6 +31,7 @@ public:
 	float width = 1;
 	float height = 1;
 
+
 	bool jump = false;
 	float jumpPower = 0;
 

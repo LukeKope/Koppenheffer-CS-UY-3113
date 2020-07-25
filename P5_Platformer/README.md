@@ -6,16 +6,16 @@
 - Press space to jump
 
 ***To-Do***
-1. Have checks in place to keep track of player lives (can lose lives from enemies or from falling off the stage)
-	- To check if they fell off the stage, simply check the player's y position. If it goes off the viewport (i.e. < -4.5), 
-	  they fell off screen and you can deduct a life and reset the player to a safe platform (or the start of the level)
+1. Have checks in place to keep track of player lives (can lose lives from enemies or from falling off the stage)	
 
 2. Show you lose or you win text upon win/lose conditions
 
-3. Add the AI to the game
+3. Add a more elegant way of tracking player lives other than doing it in main
 
-4. Add sound to the game
+4. Add the AI to the game
 
-5. Add more interesting level design, maybe even some verticality? Have the camera follow the player vertically
+5. Add sound to the game
 
-6. Make own custom assets
+6. Add more interesting level design, maybe even some verticality? Have the camera follow the player vertically
+
+7. Make own custom assets

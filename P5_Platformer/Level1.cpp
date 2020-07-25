@@ -23,13 +23,18 @@ void Level1::Initialize() {
 
 	GLuint mapTextureID = Util::LoadTexture("tileset.png");
 	state.map = new Map(LEVEL1_WIDTH, LEVEL1_HEIGHT, level1_data, mapTextureID, 1.0f, 4, 1);
+
+	// Initialize text
+	state.text = new Entity();
+	// Initialize font
+	state.text->textureID = Util::LoadTexture("font1.png");
 	
 	// Initialize Game Objects
 
 	// Initialize Player
 	state.player = new Entity();
 	// Setting entity Type so we can know what type of object this is when we check for collisions
-	state.player->entityType = PLAYER;
+	state.player->entityType = PLAYER;	
 	state.player->position = glm::vec3(5, 0, 0);
 	state.player->movement = glm::vec3(0);
 	// Setting acceleration to gravity
@@ -85,4 +90,5 @@ void Level1::Update(float deltaTime) {
 void Level1::Render(ShaderProgram* program) {
 	state.map->Render(program);
 	state.player->Render(program);
+	
 }
