@@ -1,0 +1,10 @@
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\CS3113_Course_Materials\CS3113-master\Templates\VisualStudioSDLProject\SDLProject\Debug\SDLProject.exe
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\CS3113_Course_Materials\CS3113-master\Templates\VisualStudioSDLProject\SDLProject\Debug\SDLProject.pdb
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Lecture Exercises\6.4-6.9_FixedTimeStep\Debug\SDLProject.exe
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Lecture Exercises\6.4-6.9_FixedTimeStep\Debug\SDLProject.pdb
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Lecture Exercises\8.5-8.9_AI\Debug\SDLProject.exe
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Lecture Exercises\8.5-8.9_AI\Debug\SDLProject.pdb
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Lecture Exercises\Week_9_Tilesets\Debug\SDLProject.exe
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Lecture Exercises\Week_9_Tilesets\Debug\SDLProject.pdb
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P5_Platformer\Debug\SDLProject.exe
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P5_Platformer\Debug\SDLProject.pdb
