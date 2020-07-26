@@ -11,10 +11,10 @@ unsigned int level3_data[] =
 	3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 1, 1, 1,
-	3, 1, 1, 1, 1, 1, 1, 0, 0, 1, 2, 2, 2, 2,
-	3, 2, 2, 2, 2, 2, 2, 0, 0, 1, 2, 2, 2, 2
+	3, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+	3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1,
+	3, 1, 1, 1, 1, 1, 1, 0, 0, 3, 2, 2, 2, 2,
+	3, 2, 2, 2, 2, 2, 2, 0, 0, 3, 2, 2, 2, 2
 };
 
 void Level3::Initialize() {
@@ -77,9 +77,18 @@ void Level3::Initialize() {
 void Level3::Update(float deltaTime) {
 	state.player->Update(deltaTime, state.player, state.enemies, LEVEL3_ENEMY_COUNT, state.map);
 
+	// CONDITION TO ADVANCE THE PLAYER TO THE NEXT LEVEL (if they're far enough to the right, go to the next level)
+	if (state.player->position.x >= 12) {
+		// Notify the game that the player won so we can draw the winning text
+		state.playerWins = true;
+	}
+
 	
 }
 void Level3::Render(ShaderProgram* program) {
 	state.map->Render(program);
 	state.player->Render(program);
+	if (state.playerWins) {
+		Util::DrawText(program, Util::LoadTexture("font1.png"), "You win!", 0.5, 0.05, glm::vec3(state.player->position.x, -1.5, 0));
+	}
 }

@@ -19,6 +19,7 @@ struct GameState {
 	Entity* enemies;
 	Entity* text;	
 	int nextScene;
+	bool playerWins = false;
 };
 
 class Scene {

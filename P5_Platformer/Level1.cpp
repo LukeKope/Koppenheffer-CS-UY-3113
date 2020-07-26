@@ -2,19 +2,19 @@
 
 #define LEVEL1_ENEMY_COUNT 1
 
-#define LEVEL1_WIDTH 14
+#define LEVEL1_WIDTH 20
 #define LEVEL1_HEIGHT 8
 
 unsigned int level1_data[] =
 {
-	3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1,
-	3, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2,
-	3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
+	3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 3, 0,
+	3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 2, 2, 3, 0,
+	3, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 0, 0, 2, 2, 3, 0,
+	3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 2, 2, 3, 0
 };
 
 void Level1::Initialize() {
@@ -28,13 +28,13 @@ void Level1::Initialize() {
 	state.text = new Entity();
 	// Initialize font
 	state.text->textureID = Util::LoadTexture("font1.png");
-	
+
 	// Initialize Game Objects
 
 	// Initialize Player
 	state.player = new Entity();
 	// Setting entity Type so we can know what type of object this is when we check for collisions
-	state.player->entityType = PLAYER;	
+	state.player->entityType = PLAYER;
 	state.player->position = glm::vec3(5, 0, 0);
 	state.player->movement = glm::vec3(0);
 	// Setting acceleration to gravity
@@ -59,7 +59,7 @@ void Level1::Initialize() {
 	// When we checked collisions prior, the sprite appeared to be floating because the sprite actually had a bit of a border around it
 	// We fix this by setting the size of the player sprite
 	state.player->height = 0.8f;
-	state.player->width = 0.8f;	
+	state.player->width = 0.8f;
 
 	//Enemy Initialization
 	state.enemies = new Entity[LEVEL1_ENEMY_COUNT];
@@ -72,17 +72,16 @@ void Level1::Initialize() {
 	// Specifying the state that the AI is in. Is it walking, idle, attacking, etc.
 	state.enemies[0].aiState = IDLE;
 	state.enemies[0].textureID = enemyTextureID;
-	state.enemies[0].position = glm::vec3(4, -2.0f, 0);
+	state.enemies[0].position = glm::vec3(18, 0, 0);
 	state.enemies[0].speed = 1;
 	// Apply gravity to the AI
-	state.enemies[0].acceleration = glm::vec3(0, -9.81f, 0);
-	state.enemies[0].isActive = false;
+	state.enemies[0].acceleration = glm::vec3(0, -9.81f, 0);	
 }
 void Level1::Update(float deltaTime) {
 	state.player->Update(deltaTime, state.player, state.enemies, LEVEL1_ENEMY_COUNT, state.map);
 
 	// CONDITION TO ADVANCE THE PLAYER TO THE NEXT LEVEL (if they're far enough to the right, go to the next level)
-	if (state.player->position.x >= 12) {
+	if (state.player->position.x >= 18) {
 		// this sends a notice to main that we want to change levels to level 2
 		state.nextScene = 2;
 	}
@@ -90,5 +89,6 @@ void Level1::Update(float deltaTime) {
 void Level1::Render(ShaderProgram* program) {
 	state.map->Render(program);
 	state.player->Render(program);
-	
+	state.enemies[0].Render(program);
+
 }
