@@ -26,7 +26,11 @@ void Level2::Initialize() {
 	GLuint mapTextureID = Util::LoadTexture("tileset.png");
 	state.map = new Map(LEVEL2_WIDTH, LEVEL2_HEIGHT, level2_data, mapTextureID, 1.0f, 4, 1);
 
-	// Initialize Game Objects
+	state.flag = new Entity();
+	state.flag->textureID = Util::LoadTexture("Flag.png");
+	state.flag->position = glm::vec3(12, -4, 0);
+
+//----- Initialize Game Objects -----
 
 	// Initialize Player
 	state.player = new Entity();
@@ -60,7 +64,7 @@ void Level2::Initialize() {
 
 	//Enemy Initialization
 	state.enemies = new Entity[LEVEL2_ENEMY_COUNT];
-	GLuint enemyTextureID = Util::LoadTexture("ctg.png");
+	GLuint enemyTextureID = Util::LoadTexture("slime.png");
 
 	// Setting entity Type so we can know what type of object this is when we check for collisions
 	state.enemies[0].entityType = ENEMY;
@@ -78,6 +82,7 @@ void Level2::Initialize() {
 void Level2::Update(float deltaTime) {
 	state.player->Update(deltaTime, state.player, state.enemies, LEVEL2_ENEMY_COUNT, state.map);
 	state.enemies[0].Update(deltaTime, state.player, state.enemies, LEVEL2_ENEMY_COUNT, state.map);
+	state.flag->Update(deltaTime, state.player, state.enemies, LEVEL2_ENEMY_COUNT, state.map);
 
 	// Have enemy jump everytime he's on the floor
 	if (state.enemies[0].collidedBottom) {
@@ -109,6 +114,7 @@ void Level2::Update(float deltaTime) {
 void Level2::Render(ShaderProgram* program) {
 	state.map->Render(program);
 	state.player->Render(program);
+	state.flag->Render(program);
 	for (int i = 0; i < LEVEL2_ENEMY_COUNT; i++) {
 		// Only draw the enemy if it hasn't been killed by the player
 		if (!state.enemies[i].dead) {

@@ -30,7 +30,11 @@ void Level1::Initialize() {
 	// Initialize font
 	state.text->textureID = Util::LoadTexture("font1.png");
 
-	// Initialize Game Objects
+	state.flag = new Entity();
+	state.flag->textureID = Util::LoadTexture("Flag.png");
+	state.flag->position = glm::vec3(18,-3, 0);
+
+// ------ Initialize Game Objects -----
 
 	// Initialize Player
 	state.player = new Entity();
@@ -64,7 +68,7 @@ void Level1::Initialize() {
 
 	//Enemy Initialization
 	state.enemies = new Entity[LEVEL1_ENEMY_COUNT];
-	GLuint enemyTextureID = Util::LoadTexture("ctg.png");
+	GLuint enemyTextureID = Util::LoadTexture("slime.png");
 
 	// Setting entity Type so we can know what type of object this is when we check for collisions
 	state.enemies[0].entityType = ENEMY;
@@ -78,8 +82,11 @@ void Level1::Initialize() {
 	// Apply gravity to the AI
 	state.enemies[0].acceleration = glm::vec3(0, -9.81f, 0);	
 }
+
+
 void Level1::Update(float deltaTime) {
 	state.player->Update(deltaTime, state.player, state.enemies, LEVEL1_ENEMY_COUNT, state.map);
+	state.flag->Update(deltaTime, state.player, state.enemies, LEVEL1_ENEMY_COUNT, state.map);
 	state.enemies[0].Update(deltaTime, state.player, state.enemies, LEVEL1_ENEMY_COUNT, state.map);
 
 
@@ -100,7 +107,7 @@ void Level1::Update(float deltaTime) {
 	}
 
 	// CONDITION TO ADVANCE THE PLAYER TO THE NEXT LEVEL (if they're far enough to the right, go to the next level)
-	if (state.player->position.x >= 18) {
+	if (state.player->position.x >= 17) {
 		// this sends a notice to main that we want to change levels to level 2
 		state.nextScene = 2;
 	}
@@ -108,6 +115,7 @@ void Level1::Update(float deltaTime) {
 void Level1::Render(ShaderProgram* program) {
 	state.map->Render(program);
 	state.player->Render(program);
+	state.flag->Render(program);
 	for (int i = 0; i < LEVEL1_ENEMY_COUNT; i++) {
 		// Only draw the enemy if it hasn't been killed by the player
 		if (!state.enemies[i].dead) {

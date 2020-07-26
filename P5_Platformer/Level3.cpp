@@ -27,7 +27,11 @@ void Level3::Initialize() {
 	GLuint mapTextureID = Util::LoadTexture("tileset.png");
 	state.map = new Map(LEVEL3_WIDTH, LEVEL3_HEIGHT, level3_data, mapTextureID, 1.0f, 4, 1);
 
-	// Initialize Game Objects
+	state.flag = new Entity();
+	state.flag->textureID = Util::LoadTexture("Flag.png");
+	state.flag->position = glm::vec3(12, -4, 0);
+
+//----- Initialize Game Objects ------
 
 	// Initialize Player
 	state.player = new Entity();
@@ -61,7 +65,7 @@ void Level3::Initialize() {
 
 	//Enemy Initialization
 	state.enemies = new Entity[LEVEL3_ENEMY_COUNT];
-	GLuint enemyTextureID = Util::LoadTexture("ctg.png");
+	GLuint enemyTextureID = Util::LoadTexture("slime.png");
 
 	// Setting entity Type so we can know what type of object this is when we check for collisions
 	state.enemies[0].entityType = ENEMY;
@@ -78,6 +82,7 @@ void Level3::Initialize() {
 void Level3::Update(float deltaTime) {
 	state.player->Update(deltaTime, state.player, state.enemies, LEVEL3_ENEMY_COUNT, state.map);
 	state.enemies[0].Update(deltaTime, state.player, state.enemies, LEVEL3_ENEMY_COUNT, state.map);
+	state.flag->Update(deltaTime, state.player, state.enemies, LEVEL3_ENEMY_COUNT, state.map);
 
 	// If player collides with an enemy who is NOT dead
 	if (state.player->enemyCollidedWith != nullptr && !state.player->enemyCollidedWith->dead && state.player->lastCollision == ENEMY) {
@@ -104,6 +109,7 @@ void Level3::Update(float deltaTime) {
 void Level3::Render(ShaderProgram* program) {
 	state.map->Render(program);
 	state.player->Render(program);
+	state.flag->Render(program);
 	for (int i = 0; i < LEVEL3_ENEMY_COUNT; i++) {
 		// Only draw the enemy if it hasn't been killed by the player
 		if (!state.enemies[i].dead) {
