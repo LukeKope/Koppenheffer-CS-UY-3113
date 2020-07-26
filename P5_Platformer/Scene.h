@@ -20,6 +20,7 @@ struct GameState {
 	Entity* text;	
 	int nextScene;
 	bool playerWins = false;
+	glm::vec3 startPosition;
 };
 
 class Scene {

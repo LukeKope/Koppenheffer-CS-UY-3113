@@ -8,6 +8,7 @@ Entity::Entity()
 	movement = glm::vec3(0);
 	acceleration = glm::vec3(0);
 	velocity = glm::vec3(0);
+	dead = false;
 
 	modelMatrix = glm::mat4(1.0f);
 }
@@ -20,6 +21,8 @@ bool Entity::CheckCollision(Entity* other) {
 	float y_dist = fabs(position.y - other->position.y) - ((height + other->height) / 2.0f);
 
 	if (x_dist < 0 && y_dist < 0) {
+		// Store the type of the lastCollision
+		lastCollision = other->entityType;
 		return true;
 	}
 	// Not colliding
@@ -33,19 +36,35 @@ void Entity::CheckCollisionsY(Entity* objects, int objectCount)
 		Entity* object = &objects[i];
 		if (CheckCollision(object))
 		{
-			float ydist = fabs(position.y - object->position.y);
-			float penetrationY = fabs(ydist - (height / 2.0f) - (object->height / 2.0f));
-			if (velocity.y > 0) {
-				position.y -= penetrationY;
-				velocity.y = 0;
-				// We went up and collided with something, so top collision flag is true
-				collidedTop = true;
+			// Platform collision checks
+			if (objects->entityType == PLATFORM) {
+				float ydist = fabs(position.y - object->position.y);
+				float penetrationY = fabs(ydist - (height / 2.0f) - (object->height / 2.0f));
+				if (velocity.y > 0) {
+					position.y -= penetrationY;
+					velocity.y = 0;
+					// We went up and collided with something, so top collision flag is true
+					collidedTop = true;
+				}
+				else if (velocity.y < 0) {
+					position.y += penetrationY;
+					velocity.y = 0;
+					// We are moving down and collided with something below, bottom collision flag is true
+					collidedBottom = true;
+				}
 			}
-			else if (velocity.y < 0) {
-				position.y += penetrationY;
-				velocity.y = 0;
-				// We are moving down and collided with something below, bottom collision flag is true
-				collidedBottom = true;
+			// Enemy collision checks
+			else if (objects->entityType == ENEMY) {
+				// Update the pointer to who we collided with
+				enemyCollidedWith = object;
+				if (object->position.y > position.y) {
+					// Enemy was above player, player got jumped on
+					collidedTop = true;
+				}
+				else if (object->position.y < position.y) {
+					// Enemy was below player, player jumped on enemy
+					collidedBottom = true;
+				}
 			}
 		}
 	}
@@ -58,21 +77,41 @@ void Entity::CheckCollisionsX(Entity* objects, int objectCount)
 		Entity* object = &objects[i];
 		if (CheckCollision(object))
 		{
-			float xdist = fabs(position.x - object->position.x);
-			float penetrationX = fabs(xdist - (width / 2.0f) - (object->width / 2.0f));
-			if (velocity.x > 0) {
-				position.x -= penetrationX;
-				velocity.x = 0;
-				// Collided with something while moving right
-				collidedRight = true;
+			// Collision checks for platform
+			if (objects->entityType == PLATFORM) {
+				float xdist = fabs(position.x - object->position.x);
+				float penetrationX = fabs(xdist - (width / 2.0f) - (object->width / 2.0f));
+				if (velocity.x > 0) {
+					position.x -= penetrationX;
+					velocity.x = 0;
+					// Collided with something while moving right
+					collidedRight = true;
+				}
+				else if (velocity.x < 0) {
+					position.x += penetrationX;
+					velocity.x = 0;
+					// Collided with something while moving left
+					collidedLeft = true;
+				}
 			}
-			else if (velocity.x < 0) {
-				position.x += penetrationX;
-				velocity.x = 0;
-				// Collided with something while moving left
-				collidedLeft = true;
+			// Enemy collision check
+			else if (objects->entityType == ENEMY) {
+				// Update the pointer to who we collided with
+				enemyCollidedWith = object;
+				// Enemy is to the right of the player during collision
+				if (object->position.x > position.x)
+				{
+					collidedRight = true;
+				}
+				// Enemy is to the left of the player during collision
+				else if (object->position.x < position.x)
+				{
+					collidedLeft = true;
+				}
 			}
+
 		}
+
 	}
 }
 
@@ -141,6 +180,7 @@ void Entity::CheckCollisionsX(Map* map)
 }
 
 //AI Functions
+//AI Functions
 void Entity::AIWalker() {
 	movement = glm::vec3(-1, 0, 0);
 }
@@ -155,10 +195,11 @@ void Entity::AIWaitAndGo(Entity* player) {
 		break;
 
 	case WALKING:
-		if (player->position.x < position.x) {
+		// Provide a bit of a buffer so the enemy isn't right on top of you
+		if (player->position.x < position.x - 0.5f) {
 			movement = glm::vec3(-1, 0, 0);
 		}
-		else {
+		else if (player->position.x > position.x + 0.5f) {
 			movement = glm::vec3(1, 0, 0);
 		}
 
@@ -166,6 +207,26 @@ void Entity::AIWaitAndGo(Entity* player) {
 
 	case ATTACKING:
 		break;
+	}
+}
+
+// Jumper enemy AI jumps whenever it collides with the floor
+void Entity::AIJumper() {
+	if (jump) {
+		jump = false;
+		velocity.y += jumpPower;
+	}
+}
+
+// Patrol enemy AI that walks to the left of the screen, then turns around
+void Entity::AIPatrol() {
+	// On left side of screen, turn and go right
+	if (position.x < -4.0f) {
+		movement = glm::vec3(1, 0, 0);
+	}
+	// On right side of the screen, turn around and go left
+	else if (position.x > 4.0f) {
+		movement = glm::vec3(-1, 0, 0);
 	}
 }
 
@@ -178,6 +239,14 @@ void Entity::AI(Entity* player) {
 
 	case WAITANDGO:
 		AIWaitAndGo(player);
+		break;
+
+	case JUMPER:
+		AIJumper();
+		break;
+
+	case PATROL:
+		AIPatrol();
 		break;
 	}
 }
@@ -219,10 +288,12 @@ void Entity::Update(float deltaTime, Entity* player, Entity* objects, int object
 		}
 	}
 
-	if (jump) {
-		jump = false;
-
-		velocity.y += jumpPower;
+	// Allow player to jump
+	if (entityType == PLAYER) {
+		if (jump) {
+			jump = false;
+			velocity.y += jumpPower;
+		}
 	}
 
 	// Using the acceleration and velocity variables
@@ -234,16 +305,20 @@ void Entity::Update(float deltaTime, Entity* player, Entity* objects, int object
 	// Update position, check for collision for y then x
 	position.y += velocity.y * deltaTime; // Move on Y
 	CheckCollisionsY(map);
-	CheckCollisionsY(objects, objectCount); // Fix if needed
+	//CheckCollisionsY(objects, objectCount); // Fix if needed
 
 	position.x += velocity.x * deltaTime; // Move on X
 	CheckCollisionsX(map);
-	CheckCollisionsX(objects, objectCount); // Fix if needed
+	//CheckCollisionsX(objects, objectCount); // Fix if needed
 
 	/*-----NEED TO CHECK COLLISIONS WITH THE PLAYER AND THE AI-----*/
+	// Only check for collisions with an enemy if you're updating the player (otherwise, the jumper AI will jump infinitely because collidedBottom is always true from calling these checks on itself)
+	if (entityType == PLAYER) {
+		CheckCollisionsY(objects, objectCount); // Update proper collision flags, update pointer to Enemy we collided with
+		CheckCollisionsX(objects, objectCount); // Update proper collision flags, update pointer to Enemy we collided with
+	}
 
 
-	
 
 	modelMatrix = glm::mat4(1.0f);
 	modelMatrix = glm::translate(modelMatrix, position);

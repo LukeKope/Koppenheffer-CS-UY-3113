@@ -4,15 +4,15 @@
 *Instructions*
 - Use the arrow keys to move around
 - Press space to jump
+- Jump on enemies to defeat them
+- Reach the end of the level to win
 
 ***To-Do***
-1. Have checks in place to keep track of player lives (can lose lives from enemies or from falling off the stage)	
+**Add sound, clean up the code base (abstract away initializing player for each level, reset enemy position on each time the player dies)**
 
-2. Show you lose or you win text upon win/lose conditions
+1. Add an actual object (flag, door, etc.) to the end of the level so there's a visual indicator for victory
 
 3. Add a more elegant way of tracking player lives other than doing it in main
-
-4. Add the AI to the game
 
 5. Add sound to the game
 

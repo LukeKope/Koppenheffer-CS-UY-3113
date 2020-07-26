@@ -14,12 +14,13 @@
 #include "Map.h"
 
 enum EntityType {PLAYER, PLATFORM, ENEMY};
-enum AIType { WALKER, WAITANDGO };
+enum AIType { WALKER, WAITANDGO, JUMPER, PATROL };
 enum AIState { IDLE, WALKING, ATTACKING };
 
 class Entity {
 public:
 	EntityType entityType;
+	EntityType lastCollision;
 	AIType aiType;
 	AIState aiState;
 	glm::vec3 position;
@@ -30,6 +31,11 @@ public:
 	// Units to use for collision detection checks
 	float width = 1;
 	float height = 1;
+
+	// track last enemy we collided with so we can remove it from the screen if player kills it
+	Entity* enemyCollidedWith;
+	// Keep track of if an entity gets hit or not
+	bool dead;
 
 
 	bool jump = false;
@@ -76,4 +82,6 @@ public:
 	void AI(Entity* player);
 	void AIWalker();
 	void AIWaitAndGo(Entity* player);
+	void AIJumper();
+	void AIPatrol();
 };

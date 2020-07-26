@@ -190,11 +190,19 @@ void Update() {
 	if (currentScene != sceneList[0]) {
 		// If the player falls off the screen, deduct a life
 		if (currentScene->state.player->position.y < -10.00f) {
+			// let the game know the player has died so position can be reset
+			currentScene->state.player->dead = true;			
+		}
+
+		if (currentScene->state.player->dead) {
 			playerLives--;
 			// Reset the player position to the start of the level if they fall off the map
-			currentScene->state.player->position = glm::vec3(5, 0, 0);
+			currentScene->state.player->position = currentScene->state.startPosition;
+			currentScene->state.player->dead = false;
 		}
 	}
+
+	
 
 }
 
