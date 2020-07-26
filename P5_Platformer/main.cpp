@@ -13,6 +13,7 @@ main.cpp
 
 #define GL_GLEXT_PROTOTYPES 1
 #include <SDL.h>
+#include <SDL_mixer.h>
 #include <SDL_opengl.h>
 #include "glm/mat4x4.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -39,6 +40,9 @@ Scene* currentScene;
 Scene* sceneList[4];
 
 int playerLives = 3;
+
+// Sound effects
+Mix_Chunk* jump;
 
 void SwitchToScene(Scene* scene) {
 	currentScene = scene;
@@ -79,6 +83,9 @@ void Initialize() {
 	sceneList[2] = new Level2();
 	sceneList[3] = new Level3();
 	SwitchToScene(sceneList[0]);
+
+	// Loading sound
+	jump = Mix_LoadWAV("jump.wav");
 }
 
 void ProcessInput() {
@@ -110,6 +117,8 @@ void ProcessInput() {
 					if (currentScene->state.player->collidedBottom) {
 						// Can only jump if the player is colliding with something below them
 						currentScene->state.player->jump = true;
+						// Play the bounce sound effect everytime a ball-paddle collision occurs
+						Mix_PlayChannel(-1, jump, 0);
 					}
 				}
 				break;

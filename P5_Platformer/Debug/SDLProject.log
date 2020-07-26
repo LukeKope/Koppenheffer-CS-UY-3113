@@ -1,13 +1,5 @@
-﻿  Level1.cpp
-  Level2.cpp
-  Level3.cpp
-D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P5_Platformer\Level3.cpp(114,126): warning C4305: 'argument': truncation from 'double' to 'float'
-  Menu.cpp
-D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P5_Platformer\Menu.cpp(16,109): warning C4305: 'argument': truncation from 'double' to 'float'
-  Scene.cpp
-  main.cpp
-D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P5_Platformer\main.cpp(222,171): warning C4305: 'argument': truncation from 'double' to 'float'
-D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P5_Platformer\main.cpp(225,137): warning C4305: 'argument': truncation from 'double' to 'float'
-D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P5_Platformer\main.cpp(230,107): warning C4305: 'argument': truncation from 'double' to 'float'
-  Generating Code...
+﻿  main.cpp
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P5_Platformer\main.cpp(231,171): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P5_Platformer\main.cpp(234,137): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P5_Platformer\main.cpp(239,107): warning C4305: 'argument': truncation from 'double' to 'float'
   SDLProject.vcxproj -> D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P5_Platformer\Debug\SDLProject.exe
