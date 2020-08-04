@@ -1,0 +1,20 @@
+﻿  Entity.cpp
+  Level1.cpp
+  Level2.cpp
+  Level3.cpp
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Level3.cpp(120,126): warning C4305: 'argument': truncation from 'double' to 'float'
+  main.cpp
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\main.cpp(228,171): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\main.cpp(231,137): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\main.cpp(236,107): warning C4305: 'argument': truncation from 'double' to 'float'
+  Map.cpp
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Map.cpp(80,13): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Map.cpp(81,13): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+  Menu.cpp
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Menu.cpp(30,109): warning C4305: 'argument': truncation from 'double' to 'float'
+  Scene.cpp
+  ShaderProgram.cpp
+  Util.cpp
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Util.cpp(29,20): warning C4018: '<': signed/unsigned mismatch
+  Generating Code...
+  SDLProject.vcxproj -> D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Debug\SDLProject.exe
