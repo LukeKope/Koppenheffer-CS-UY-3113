@@ -12,6 +12,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "ShaderProgram.h"
 #include "Map.h"
+#include <vector>
 
 enum EntityType {PLAYER, PLATFORM, ENEMY};
 enum AIType { WALKER, WAITANDGO, JUMPER, PATROL };
@@ -23,6 +24,7 @@ public:
 	EntityType lastCollision;
 	AIType aiType;
 	AIState aiState;
+	std::vector<std::string> moveset; 
 	glm::vec3 position;
 	glm::vec3 movement;
 	glm::vec3 acceleration;
@@ -34,6 +36,8 @@ public:
 
 	// track last enemy we collided with so we can remove it from the screen if player kills it
 	Entity* enemyCollidedWith;
+
+	double health;
 	// Keep track of if an entity gets hit or not
 	bool dead;
 

@@ -299,22 +299,24 @@ void Entity::Update(float deltaTime, Entity* player, Entity* objects, int object
 	// Using the acceleration and velocity variables
 	// When our character starts moving, they have instant velocity
 	velocity.x = movement.x * speed;
+	velocity.y = movement.y * speed;
+
 	// If we're accelerating, we're gonna keep adding to velocity with that acceleration
 	velocity += acceleration * deltaTime;
 
 	// Update position, check for collision for y then x
 	position.y += velocity.y * deltaTime; // Move on Y
-	CheckCollisionsY(map);
-	//CheckCollisionsY(objects, objectCount); // Fix if needed
+	//CheckCollisionsY(map);
+	CheckCollisionsY(objects, objectCount); // Fix if needed
 
 	position.x += velocity.x * deltaTime; // Move on X
-	CheckCollisionsX(map);
-	//CheckCollisionsX(objects, objectCount); // Fix if needed
+	//CheckCollisionsX(map);
+	CheckCollisionsX(objects, objectCount); // Fix if needed
 
 	/*-----NEED TO CHECK COLLISIONS WITH THE PLAYER AND THE AI-----*/
 	// Only check for collisions with an enemy if you're updating the player (otherwise, the jumper AI will jump infinitely because collidedBottom is always true from calling these checks on itself)
 	if (entityType == PLAYER) {
-		CheckCollisionsY(objects, objectCount); // Update proper collision flags, update pointer to Enemy we collided with
+		//CheckCollisionsY(objects, objectCount); // Update proper collision flags, update pointer to Enemy we collided with
 		CheckCollisionsX(objects, objectCount); // Update proper collision flags, update pointer to Enemy we collided with
 	}
 

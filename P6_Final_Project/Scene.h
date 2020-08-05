@@ -18,7 +18,6 @@ struct GameState {
 	Map* map;
 	Entity* player;
 	Entity* enemies;
-	Entity* flag;
 	Entity* text;	
 	int nextScene;
 	bool playerWins = false;

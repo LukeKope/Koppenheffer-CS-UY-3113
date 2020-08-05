@@ -145,6 +145,14 @@ void ProcessInput() {
 			currentScene->state.player->movement.x = 1.0f;
 			currentScene->state.player->animIndices = currentScene->state.player->animRight;
 		}
+		else if (keys[SDL_SCANCODE_UP]) {
+			currentScene->state.player->movement.y = 1.0f;
+			currentScene->state.player->animIndices = currentScene->state.player->animUp;
+		}
+		else if (keys[SDL_SCANCODE_DOWN]) {
+			currentScene->state.player->movement.y = -1.0f;
+			currentScene->state.player->animIndices = currentScene->state.player->animDown;
+		}
 
 
 		if (glm::length(currentScene->state.player->movement) > 1.0f) {
@@ -195,7 +203,7 @@ void Update() {
 	// Constantly check for the player falling off screen and put them back to the start if they fall
 	if (currentScene != sceneList[0]) {
 		// If the player falls off the screen, deduct a life
-		if (currentScene->state.player->position.y < -10.00f) {
+		if (currentScene->state.player->health < 0.0f) {
 			// let the game know the player has died so position can be reset
 			currentScene->state.player->dead = true;			
 		}
