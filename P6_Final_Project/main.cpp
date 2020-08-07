@@ -26,6 +26,7 @@ main.cpp
 #include "Scene.h"
 #include "Menu.h"
 #include "Level1.h"
+#include "Battle.h"
 
 
 SDL_Window* displayWindow;
@@ -36,9 +37,9 @@ glm::mat4 viewMatrix, modelMatrix, projectionMatrix;
 
 Scene* currentScene;
 // Hold an array of levels and we can point to the current level
-Scene* sceneList[4];
+Scene* sceneList[3];
 
-int playerLives = 3;
+
 
 // Sound effects
 Mix_Chunk* jump;
@@ -79,6 +80,7 @@ void Initialize() {
 	// Initializing our levels and starting at level 1
 	sceneList[0] = new Menu();
 	sceneList[1] = new Level1();	
+	sceneList[2] = new Battle();
 	SwitchToScene(sceneList[0]);
 
 	// Loading sound
@@ -109,7 +111,7 @@ void ProcessInput() {
 				break;
 
 			case SDLK_SPACE:
-				if (currentScene != sceneList[0] && playerLives != 0) {
+				if (currentScene != sceneList[0]) {
 					// Jump (note we only check for a single press of the button)
 					if (currentScene->state.player->collidedBottom) {
 						// Can only jump if the player is colliding with something below them
@@ -135,7 +137,7 @@ void ProcessInput() {
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
 
 	// Do not process player input on the menu screen and do not allow the player to move if they lose
-	if (currentScene != sceneList[0] && playerLives != 0) {
+	if (currentScene != sceneList[0]) {
 
 		if (keys[SDL_SCANCODE_LEFT]) {
 			currentScene->state.player->movement.x = -1.0f;
@@ -192,11 +194,11 @@ void Update() {
 		viewMatrix = glm::mat4(1.0f);
 		// If our x coordinate is past 5, then start following him (note how 5 is the player's starting position)
 		if (currentScene->state.player->position.x > 5) {
-			viewMatrix = glm::translate(viewMatrix, glm::vec3(-currentScene->state.player->position.x, 3.75, 0));
+			viewMatrix = glm::translate(viewMatrix, glm::vec3(-currentScene->state.player->position.x, -currentScene->state.player->position.y, 0));
 		}
 		// Otherwise, lock the camera
 		else {
-			viewMatrix = glm::translate(viewMatrix, glm::vec3(-5, 3.75, 0));
+			viewMatrix = glm::translate(viewMatrix, glm::vec3(-5, -currentScene->state.player->position.y, 0));
 		}
 	}
 
@@ -206,14 +208,7 @@ void Update() {
 		if (currentScene->state.player->health < 0.0f) {
 			// let the game know the player has died so position can be reset
 			currentScene->state.player->dead = true;			
-		}
-
-		if (currentScene->state.player->dead) {
-			playerLives--;
-			// Reset the player position to the start of the level if they fall off the map
-			currentScene->state.player->position = currentScene->state.startPosition;
-			currentScene->state.player->dead = false;
-		}
+		}		
 	}
 
 	
@@ -231,21 +226,12 @@ void Render() {
 	currentScene->Render(&program);
 
 	if (currentScene != sceneList[0]) {
-		// Draw lives in top right of every screen
-		if (currentScene->state.player->position.x > 5) {
-			Util::DrawText(&program, Util::LoadTexture("font1.png"), "Lives: " + std::to_string(playerLives), 0.5, 0.05, glm::vec3(currentScene->state.player->position.x, -0.5, 0));
-		}
-		else {
-			Util::DrawText(&program, Util::LoadTexture("font1.png"), "Lives: " + std::to_string(playerLives), 0.5, 0.05, glm::vec3(5.0f, -0.5, 0));
-		}
-
+		
 		// Draw you lose when you lose
-		if (playerLives == 0) {
-			Util::DrawText(&program, Util::LoadTexture("font1.png"), "You lose", 0.5, 0.05, glm::vec3(2.5, -2.5, 0));
+		if (currentScene->state.player->dead) {
+			Util::DrawText(&program, Util::LoadTexture("font1.png"), "Game Over", 0.5, 0.05, glm::vec3(2.5, -2.5, 0));
 		}
 	}
-
-
 
 	SDL_GL_SwapWindow(displayWindow);
 }

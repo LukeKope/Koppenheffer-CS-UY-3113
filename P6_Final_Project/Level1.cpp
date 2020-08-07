@@ -106,18 +106,8 @@ void Level1::Update(float deltaTime) {
 
 	// If player collides with an enemy who is NOT dead
 	if (state.player->enemyCollidedWith != nullptr && !state.player->enemyCollidedWith->dead && state.player->lastCollision == ENEMY) {
-		// If the player jumped and killed an enemy, remove that enemy
-		if (state.player->collidedBottom && state.player->velocity.y < 0) {
-			// Set the enemy we collide with to dead, do not render it
-			state.player->enemyCollidedWith->dead = true;
-
-		}
-		// If player collided with an enemy without jumping on them
-		else if (state.player->collidedLeft || state.player->collidedRight || state.player->collidedTop) {
-			// Player did not jump on the enemy, game over
-			state.player->dead = true;			
-		}
-
+		// Enter the battle screen
+		state.nextScene = 2;
 	}
 
 	// CONDITION TO ADVANCE THE PLAYER TO THE NEXT LEVEL (if they're far enough to the right, go to the next level)

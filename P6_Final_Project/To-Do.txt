@@ -1,0 +1,27 @@
+To-Do
+
+Battle System
+---
+- Fix camera and starting position for player and enemy in the battle room
+- 
+- Have player health consistent (needs to be a state object accessible outside of the battle class)
+- Get UI working for move selection
+- Get player and enemy they collided with to spawn into the battle room
+
+
+Camera
+---
+- Need to update the Y position of the camera
+- Lock the camera at a certain position
+
+
+Enemies
+---
+- Enemies need to be able to fight the player
+- Enemy needs to die if the player defeats them
+- Display enemy health (can be scoped to the battle room)
+
+
+Main Screen
+---
+- Don't let player walk out of the boundaries of the map

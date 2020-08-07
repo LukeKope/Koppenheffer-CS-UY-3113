@@ -3,27 +3,19 @@
 
 #define BATTLE_ENEMY_COUNT 1
 
-#define BATTLE_WIDTH 20
-#define BATTLE_HEIGHT 16
+#define BATTLE_WIDTH 10
+#define BATTLE_HEIGHT 8
 
 unsigned int Battle_data[] =
 {
-	3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-	3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-	3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-	3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-	3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2,
-	3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2,
-	3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2,
-	3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2,
-	3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-	3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-	3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-	3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-	3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2,
-	3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2,
-	3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2,
-	3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2
+	3,3,3,3,3,3,3,3,3,3,
+	3,0,0,0,0,0,0,0,0,3,
+	3,0,0,0,0,0,0,0,0,3,
+	3,0,0,0,0,0,0,0,0,3,
+	3,0,0,0,0,0,0,0,0,3,
+	3,2,2,2,2,2,2,2,2,3,
+	3,2,2,2,2,2,2,2,2,3,
+	3,2,2,2,2,2,2,2,2,3,
 };
 
 void Battle::InitPlayer() {
@@ -45,7 +37,7 @@ void Battle::InitPlayer() {
 	state.player->animUp = new int[4]{ 2, 6, 10, 14 };
 	state.player->animDown = new int[4]{ 0, 4, 8, 12 };
 
-	state.player->animIndices = state.player->animDown;
+	state.player->animIndices = state.player->animRight;
 	state.player->animFrames = 4;
 	state.player->animIndex = 0;
 	state.player->animTime = 0;
@@ -65,7 +57,7 @@ void Battle::InitPlayer() {
 void Battle::Initialize() {
 	// Make sure that the next scene is initialized to -1
 	state.nextScene = -1;
-	state.startPosition = glm::vec3(5, 0, 0);
+	state.startPosition = glm::vec3(2, -4, 0);
 
 	GLuint mapTextureID = Util::LoadTexture("tileset.png");
 	state.map = new Map(BATTLE_WIDTH, BATTLE_HEIGHT, Battle_data, mapTextureID, 1.0f, 4, 1);
@@ -79,7 +71,7 @@ void Battle::Initialize() {
 
 	// ------ Initialize Game Objects -----
 
-		// Initialize Player
+// Initialize Player
 	InitPlayer();
 
 	//Enemy Initialization
