@@ -39,6 +39,7 @@ public:
 
 	double health;
 	// Keep track of if an entity gets hit or not
+	bool hit;
 	bool dead;
 
 

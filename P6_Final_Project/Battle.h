@@ -9,6 +9,8 @@ Battle screen for when the player enters battle with an enemy
 class Battle : public Scene {
 public:
 	void InitPlayer();
+	void enemyAttack();
+	void playerAttack();
 	void Initialize() override;
 	void Update(float deltaTime) override;
 	void Render(ShaderProgram* program) override;

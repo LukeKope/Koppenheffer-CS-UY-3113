@@ -30,6 +30,8 @@ void Battle::InitPlayer() {
 	state.player->jumpPower = 6.0f;
 	state.player->health = 100.0f;
 
+	state.player->hit = false;
+
 	state.player->textureID = Util::LoadTexture("george_0.png");
 
 	state.player->animRight = new int[4]{ 3, 7, 11, 15 };
@@ -54,7 +56,29 @@ void Battle::InitPlayer() {
 	state.player->moveset.push_back("Arcane Light");
 }
 
+
+void Battle::enemyAttack() {
+	// Define enemy AI behavior for battle phase
+
+
+	// Have a timer so it seems like enemy is thinking/taking time to move
+	state.player->hit = true;
+
+	// Update and notify that it's the player's turn for combat
+	state.playerTurn = true;
+}
+
+void Battle::playerAttack() {
+	// Once player chooses their attack, handle the logic here
+	state.player->hit = false;
+
+	// Update and notify that it's the enemy's turn for combat
+	state.playerTurn = false;
+}
+
 void Battle::Initialize() {
+	state.playerTurn = true;
+
 	// Make sure that the next scene is initialized to -1
 	state.nextScene = -1;
 	state.startPosition = glm::vec3(2, -4, 0);
@@ -87,6 +111,7 @@ void Battle::Initialize() {
 	state.enemies[0].textureID = enemyTextureID;
 	state.enemies[0].position = glm::vec3(10, 0, 0);
 	state.enemies[0].speed = 1;
+	state.enemies[0].hit = false;
 }
 
 
@@ -94,23 +119,14 @@ void Battle::Update(float deltaTime) {
 	state.player->Update(deltaTime, state.player, state.enemies, BATTLE_ENEMY_COUNT, state.map);
 	state.enemies[0].Update(deltaTime, state.player, state.enemies, BATTLE_ENEMY_COUNT, state.map);
 
-	// When player collides with an enemy, enter the battle phase
-
-	// If player collides with an enemy who is NOT dead
-	if (state.player->enemyCollidedWith != nullptr && !state.player->enemyCollidedWith->dead && state.player->lastCollision == ENEMY) {
-		// If the player jumped and killed an enemy, remove that enemy
-		if (state.player->collidedBottom && state.player->velocity.y < 0) {
-			// Set the enemy we collide with to dead, do not render it
-			state.player->enemyCollidedWith->dead = true;
-
-		}
-		// If player collided with an enemy without jumping on them
-		else if (state.player->collidedLeft || state.player->collidedRight || state.player->collidedTop) {
-			// Player did not jump on the enemy, game over
-			state.player->dead = true;
-		}
-
+	// In battle phase, enter turn based combat
+	if (state.playerTurn) {
+		playerAttack();
 	}
+	else {
+		enemyAttack();
+	}
+
 
 	// CONDITION TO ADVANCE THE PLAYER TO THE NEXT LEVEL (if they're far enough to the right, go to the next level)
 	//if (state.player->position.x >= 17) {
@@ -121,6 +137,8 @@ void Battle::Update(float deltaTime) {
 void Battle::Render(ShaderProgram* program) {
 	state.map->Render(program);
 	state.player->Render(program);
+
+
 	for (int i = 0; i < BATTLE_ENEMY_COUNT; i++) {
 		// Only draw the enemy if it hasn't been killed by the player
 		if (!state.enemies[i].dead) {

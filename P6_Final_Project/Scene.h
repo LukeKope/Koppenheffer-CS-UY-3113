@@ -21,6 +21,8 @@ struct GameState {
 	Entity* text;	
 	int nextScene;
 	bool playerWins = false;
+	// Keep track of whose turn it is in combat
+	bool playerTurn;
 	glm::vec3 startPosition;
 };
 

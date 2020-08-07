@@ -20,6 +20,7 @@ main.cpp
 #include "ShaderProgram.h"
 
 #include "Util.h"
+#include "Effects.h"
 #include "Entity.h"
 #include "Map.h"
 // Including the levels
@@ -39,10 +40,10 @@ Scene* currentScene;
 // Hold an array of levels and we can point to the current level
 Scene* sceneList[3];
 
-
-
 // Sound effects
 Mix_Chunk* jump;
+
+Effects* effects;
 
 void SwitchToScene(Scene* scene) {
 	currentScene = scene;
@@ -85,6 +86,12 @@ void Initialize() {
 
 	// Loading sound
 	jump = Mix_LoadWAV("jump.wav");
+
+	// Passing in the projection and view matrixes so that it knows the dimension of the window
+	effects = new Effects(projectionMatrix, viewMatrix);
+
+	// Starting the fade in effect immediately
+	effects->Start(FADEIN, 1.0f);
 }
 
 void ProcessInput() {
@@ -136,8 +143,8 @@ void ProcessInput() {
 
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
 
-	// Do not process player input on the menu screen and do not allow the player to move if they lose
-	if (currentScene != sceneList[0]) {
+	// Allow movement on the overworld screen
+	if (currentScene == sceneList[1]) {
 
 		if (keys[SDL_SCANCODE_LEFT]) {
 			currentScene->state.player->movement.x = -1.0f;
@@ -161,6 +168,15 @@ void ProcessInput() {
 			currentScene->state.player->movement = glm::normalize(currentScene->state.player->movement);
 		}
 	}
+
+	// Defining controls for the battle screen
+	if (currentScene == sceneList[2]) {
+		// Player can navigate a UI and select the move they want to use
+		if (currentScene->state.playerTurn) {
+			// Allow player to select an attack option
+		}
+	}
+
 }
 
 
@@ -168,6 +184,8 @@ void ProcessInput() {
 #define FIXED_TIMESTEP 0.0166666f
 float lastTicks = 0;
 float accumulator = 0.0f;
+
+bool playerHit = false;
 
 void Update() {
 	float ticks = (float)SDL_GetTicks() / 1000.0f;
@@ -180,6 +198,16 @@ void Update() {
 	}
 	while (deltaTime >= FIXED_TIMESTEP) {
 		currentScene->Update(FIXED_TIMESTEP);
+
+		if (playerHit == true) {
+			effects->Start(SHAKE, 0.1f);
+			
+		}
+		if (currentScene != sceneList[0]) {
+			playerHit = currentScene->state.player->hit;
+		}
+
+		effects->Update(FIXED_TIMESTEP);
 
 		// If we have enough time to do another update, we're telling the player to Update
 		deltaTime -= FIXED_TIMESTEP;
@@ -202,6 +230,9 @@ void Update() {
 		}
 	}
 
+	// Our effects will shake the camera view while the shake effect is active
+	viewMatrix = glm::translate(viewMatrix, effects->viewOffset);
+
 	// Constantly check for the player falling off screen and put them back to the start if they fall
 	if (currentScene != sceneList[0]) {
 		// If the player falls off the screen, deduct a life
@@ -222,9 +253,11 @@ void Render() {
 	//Setting the camera in render
 	program.SetViewMatrix(viewMatrix);
 
+	// Have this so the effect scan use the right program
+	glUseProgram(program.programID);
 	// Render the current scene
 	currentScene->Render(&program);
-
+	
 	if (currentScene != sceneList[0]) {
 		
 		// Draw you lose when you lose
@@ -232,6 +265,9 @@ void Render() {
 			Util::DrawText(&program, Util::LoadTexture("font1.png"), "Game Over", 0.5, 0.05, glm::vec3(2.5, -2.5, 0));
 		}
 	}
+
+	// Render the effects last as they're more of an overlay
+	effects->Render();
 
 	SDL_GL_SwapWindow(displayWindow);
 }

@@ -1,2 +1,3 @@
-﻿  Battle.cpp
+﻿  main.cpp
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\main.cpp(265,108): warning C4305: 'argument': truncation from 'double' to 'float'
   SDLProject.vcxproj -> D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Debug\SDLProject.exe
