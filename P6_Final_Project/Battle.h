@@ -6,6 +6,7 @@ Battle screen for when the player enters battle with an enemy
 
 #pragma once
 #include "Scene.h"
+#include "Abilities.h"
 class Battle : public Scene {
 public:
 	void InitPlayer();
@@ -13,5 +14,6 @@ public:
 	void playerAttack();
 	void Initialize() override;
 	void Update(float deltaTime) override;
+	// void ProcessInput();
 	void Render(ShaderProgram* program) override;
 };

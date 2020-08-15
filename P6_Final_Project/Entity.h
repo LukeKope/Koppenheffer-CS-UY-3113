@@ -12,6 +12,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "ShaderProgram.h"
 #include "Map.h"
+#include "Abilities.h"
 #include <vector>
 
 enum EntityType {PLAYER, PLATFORM, ENEMY};
@@ -24,7 +25,8 @@ public:
 	EntityType lastCollision;
 	AIType aiType;
 	AIState aiState;
-	std::vector<std::string> moveset; 
+	// Store player or enemy abilities with member vars of move name, damage, mp.
+	std::vector<Abilities> moveset; 
 	glm::vec3 position;
 	glm::vec3 movement;
 	glm::vec3 acceleration;
@@ -41,6 +43,8 @@ public:
 	// Keep track of if an entity gets hit or not
 	bool hit;
 	bool dead;
+
+	int currMove;
 
 
 	bool jump = false;
@@ -71,7 +75,7 @@ public:
 	bool collidedLeft = false;
 	bool collidedRight = false;
 
-	Entity();
+	Entity();	
 
 	bool CheckCollision(Entity* other);
 	void CheckCollisionsY(Entity* objects, int objectCount);

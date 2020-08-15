@@ -127,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Abilities.cpp" />
     <ClCompile Include="Battle.cpp" />
     <ClCompile Include="Effects.cpp" />
     <ClCompile Include="Entity.cpp" />
@@ -139,6 +140,7 @@
     <ClCompile Include="Util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Abilities.h" />
     <ClInclude Include="Battle.h" />
     <ClInclude Include="Effects.h" />
     <ClInclude Include="Entity.h" />

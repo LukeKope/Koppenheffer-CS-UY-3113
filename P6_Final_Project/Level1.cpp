@@ -57,9 +57,6 @@ void Level1::InitPlayer() {
 	state.player->height = 0.8f;
 	state.player->width = 0.8f;
 
-	state.player->moveset.push_back("Lightning");
-	state.player->moveset.push_back("Fireball");
-	state.player->moveset.push_back("Arcane Light");
 }
 
 void Level1::Initialize() {

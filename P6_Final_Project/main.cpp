@@ -52,7 +52,7 @@ void SwitchToScene(Scene* scene) {
 
 void Initialize() {
 	SDL_Init(SDL_INIT_VIDEO);
-	displayWindow = SDL_CreateWindow("Platformer!", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_OPENGL);
+	displayWindow = SDL_CreateWindow("JRPG", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_OPENGL);
 	SDL_GLContext context = SDL_GL_CreateContext(displayWindow);
 	SDL_GL_MakeCurrent(displayWindow, context);
 
@@ -80,7 +80,7 @@ void Initialize() {
 
 	// Initializing our levels and starting at level 1
 	sceneList[0] = new Menu();
-	sceneList[1] = new Level1();	
+	sceneList[1] = new Level1();
 	sceneList[2] = new Battle();
 	SwitchToScene(sceneList[0]);
 
@@ -109,25 +109,6 @@ void ProcessInput() {
 
 		case SDL_KEYDOWN:
 			switch (event.key.keysym.sym) {
-			case SDLK_LEFT:
-				// Move the player left
-				break;
-
-			case SDLK_RIGHT:
-				// Move the player right
-				break;
-
-			case SDLK_SPACE:
-				if (currentScene != sceneList[0]) {
-					// Jump (note we only check for a single press of the button)
-					if (currentScene->state.player->collidedBottom) {
-						// Can only jump if the player is colliding with something below them
-						currentScene->state.player->jump = true;
-						// Play the bounce sound effect everytime a ball-paddle collision occurs
-						Mix_PlayChannel(-1, jump, 0);
-					}
-				}
-				break;
 				// Allow player to advance to the first level from the menu
 			case SDLK_RETURN:
 				if (currentScene == sceneList[0]) {
@@ -135,6 +116,22 @@ void ProcessInput() {
 					currentScene->state.nextScene = 1;
 				}
 				break;
+
+				// FOR THE BATTLE STAGE, ALLOW PLAYER TO SELECT THEIR MOVES
+				if (currentScene == sceneList[2]) {
+					case SDLK_1:
+						// Do move 1
+						currentScene->state.player->currMove = 0;
+						break;
+					case SDLK_2:
+						// Do move 2
+						currentScene->state.player->currMove = 1;
+						break;
+					case SDLK_3:
+						// Do move 3
+						currentScene->state.player->currMove = 2;
+						break;
+				}
 			}
 		}
 		break; // SDL_KEYDOWN
@@ -201,7 +198,7 @@ void Update() {
 
 		if (playerHit == true) {
 			effects->Start(SHAKE, 0.1f);
-			
+
 		}
 		if (currentScene != sceneList[0]) {
 			playerHit = currentScene->state.player->hit;
@@ -238,11 +235,11 @@ void Update() {
 		// If the player falls off the screen, deduct a life
 		if (currentScene->state.player->health < 0.0f) {
 			// let the game know the player has died so position can be reset
-			currentScene->state.player->dead = true;			
-		}		
+			currentScene->state.player->dead = true;
+		}
 	}
 
-	
+
 
 }
 
@@ -257,14 +254,16 @@ void Render() {
 	glUseProgram(program.programID);
 	// Render the current scene
 	currentScene->Render(&program);
-	
+
 	if (currentScene != sceneList[0]) {
-		
+
 		// Draw you lose when you lose
 		if (currentScene->state.player->dead) {
 			Util::DrawText(&program, Util::LoadTexture("font1.png"), "Game Over", 0.5, 0.05, glm::vec3(2.5, -2.5, 0));
 		}
 	}
+
+
 
 	// Render the effects last as they're more of an overlay
 	effects->Render();

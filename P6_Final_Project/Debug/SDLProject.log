@@ -1,3 +1,10 @@
-﻿  main.cpp
-D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\main.cpp(265,108): warning C4305: 'argument': truncation from 'double' to 'float'
+﻿  Battle.cpp
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Battle.cpp(205,123): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Battle.cpp(206,146): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Battle.cpp(207,123): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Battle.cpp(208,146): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Battle.cpp(209,123): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Battle.cpp(210,146): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Battle.cpp(212,148): warning C4305: 'argument': truncation from 'double' to 'float'
+D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Battle.cpp(213,151): warning C4305: 'argument': truncation from 'double' to 'float'
   SDLProject.vcxproj -> D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Debug\SDLProject.exe
