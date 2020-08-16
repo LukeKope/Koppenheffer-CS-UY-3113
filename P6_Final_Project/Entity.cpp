@@ -115,7 +115,6 @@ void Entity::CheckCollisionsX(Entity* objects, int objectCount)
 	}
 }
 
-
 void Entity::CheckCollisionsY(Map* map)
 {
 	// Probes for tiles
@@ -180,12 +179,19 @@ void Entity::CheckCollisionsX(Map* map)
 }
 
 //AI Functions
-//AI Functions
 void Entity::AIWalker() {
-	movement = glm::vec3(-1, 0, 0);
+	if (position.x > 4) {
+		movement = glm::vec3(-1, 0, 0);
+	}
+	else if (position.x < 2) {
+		movement = glm::vec3(1, 0, 0);
+	}
 }
 
 void Entity::AIWaitAndGo(Entity* player) {
+	int x_movement = 0;
+	int y_movement = 0;
+
 	switch (aiState) {
 
 	case IDLE:
@@ -197,11 +203,21 @@ void Entity::AIWaitAndGo(Entity* player) {
 	case WALKING:
 		// Provide a bit of a buffer so the enemy isn't right on top of you
 		if (player->position.x < position.x - 0.5f) {
-			movement = glm::vec3(-1, 0, 0);
+			x_movement = -1;
 		}
 		else if (player->position.x > position.x + 0.5f) {
-			movement = glm::vec3(1, 0, 0);
+			x_movement = 1;
 		}
+
+		// Follow on the Y axis as well
+		if (player->position.y < position.y - 0.5f) {
+			y_movement = -1;
+		}
+		else if (player->position.x > position.x + 0.5f) {
+			y_movement = 1;
+		}
+
+		movement = glm::vec3(x_movement, y_movement, 0);
 
 		break;
 

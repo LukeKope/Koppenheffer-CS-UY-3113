@@ -9,10 +9,11 @@ Battle screen for when the player enters battle with an enemy
 #include "Abilities.h"
 class Battle : public Scene {
 public:
-	void InitPlayer();
+	void InitPlayer(float* playerHealth);
+	void InitEnemy(Entity* globalEnemies, int currEnemyIndex);
 	void enemyAttack();
 	void playerAttack();
-	void Initialize() override;
+	void Initialize(float* playerHealth, Entity* globalEnemies, int currEnemyIndex, glm::vec3 playerPosition) override;
 	void Update(float deltaTime) override;
 	// void ProcessInput();
 	void Render(ShaderProgram* program) override;

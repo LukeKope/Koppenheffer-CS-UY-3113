@@ -19,7 +19,7 @@ unsigned int Battle_data[] =
 	3,2,2,2,2,2,2,2,2,2,3
 };
 
-void Battle::InitPlayer() {
+void Battle::InitPlayer(float* playerHealth) {
 	state.player = new Entity();
 	// Setting entity Type so we can know what type of object this is when we check for collisions
 	state.player->entityType = PLAYER;
@@ -28,8 +28,7 @@ void Battle::InitPlayer() {
 	// Setting acceleration to gravity
 	//state.player->acceleration = glm::vec3(0, -9.81f, 0);
 	state.player->speed = 4.0f;
-	state.player->jumpPower = 6.0f;
-	state.player->health = 100.0f;
+	state.player->health = playerHealth;
 
 	state.player->hit = false;
 
@@ -65,13 +64,53 @@ void Battle::InitPlayer() {
 	state.player->currMove = -1;
 }
 
+void Battle::InitEnemy(Entity* globalEnemies, int currEnemyIndex) {
+
+	// Specifying which enemy we are fighting, i.e. which enemy we last collided with
+	state.enemies = &(globalEnemies[currEnemyIndex]);
+
+	state.enemies->position = glm::vec3(7, -4, 0);
+	state.enemies->aiState = IDLE;
+	// Prevent AI from moving on battle screen
+	state.enemies->speed = 0;
+
+	////Enemy Initialization
+	//state.enemies = new Entity[BATTLE_ENEMY_COUNT];
+	//GLuint enemyTextureID = Util::LoadTexture("slime.png");
+
+	//// Setting entity Type so we can know what type of object this is when we check for collisions
+	//state.enemies[0].entityType = ENEMY;
+	//// Specifying the type of AI character this entity is
+	//// state.enemies[0].aiType = WALKER;
+	//// Specifying the state that the AI is in. Is it walking, idle, attacking, etc.
+	//state.enemies[0].aiState = IDLE;
+	//state.enemies[0].textureID = enemyTextureID;
+	//state.enemies[0].position = glm::vec3(7, -4, 0);
+	//state.enemies[0].speed = 1;
+	//state.enemies[0].hit = false;
+	//state.enemies[0].health = 100;
+
+
+	//// name, mp, damage
+	//Abilities Punch = Abilities("Punch", 10, 10);
+	//Abilities Scratch = Abilities("Scratch", 10, 5);
+
+	//state.enemies[0].moveset.push_back(Punch);
+	//state.enemies[0].moveset.push_back(Scratch);
+}
+
 
 void Battle::enemyAttack() {
 	// Define enemy AI behavior for battle phase
-	int enemyTimer = 5000;
+	
 
-	while (enemyTimer != 0) {
-		enemyTimer--;
+	int damage = state.enemies[0].moveset[0].getDamage();
+
+	if (*(state.player->health) - damage <= 0) {
+		state.player->dead = true;
+	}
+	else {
+		*(state.player->health) -= damage;
 	}
 
 	// Have a timer so it seems like enemy is thinking/taking time to move
@@ -88,12 +127,12 @@ void Battle::playerAttack() {
 
 	int damage = attack.getDamage();
 
-	if (state.enemies[0].health - damage <= 0) {
+	if (*(state.enemies[0].health) - damage <= 0) {
 		state.enemies[0].dead = true;
 	}
 	else {
 		// Decrement the enemies health
-		state.enemies[0].health -= damage;
+		*(state.enemies[0].health) -= damage;
 	}
 
 	// Once player chooses their attack, handle the logic here
@@ -106,7 +145,7 @@ void Battle::playerAttack() {
 	state.player->currMove = -1;
 }
 
-void Battle::Initialize() {
+void Battle::Initialize(float* playerHealth, Entity* globalEnemies, int currEnemyIndex, glm::vec3 playerPosition) {
 	state.playerTurn = false;
 
 	// Make sure that the next scene is initialized to -1
@@ -126,25 +165,11 @@ void Battle::Initialize() {
 	// ------ Initialize Game Objects -----
 
 // Initialize Player
-	InitPlayer();
+	InitPlayer(playerHealth);
 
-	//Enemy Initialization
-	state.enemies = new Entity[BATTLE_ENEMY_COUNT];
-	GLuint enemyTextureID = Util::LoadTexture("slime.png");
+	InitEnemy(globalEnemies, currEnemyIndex);
 
-	// Setting entity Type so we can know what type of object this is when we check for collisions
-	state.enemies[0].entityType = ENEMY;
-	// Specifying the type of AI character this entity is
-	// state.enemies[0].aiType = WALKER;
-	// Specifying the state that the AI is in. Is it walking, idle, attacking, etc.
-	state.enemies[0].aiState = IDLE;
-	state.enemies[0].textureID = enemyTextureID;
-	state.enemies[0].position = glm::vec3(7, -4, 0);
-	state.enemies[0].speed = 1;
-	state.enemies[0].hit = false;
-	state.enemies[0].health = 100;
 }
-
 
 void Battle::Update(float deltaTime) {
 	state.player->Update(deltaTime, state.player, state.enemies, BATTLE_ENEMY_COUNT, state.map);
@@ -152,6 +177,11 @@ void Battle::Update(float deltaTime) {
 
 	// In battle phase, enter turn based combat
 	if (!state.playerTurn) {
+		int enemyTimer = 5000;
+
+		while (enemyTimer != 0) {
+			enemyTimer-=deltaTime;
+		}
 		// Call enemy attack when it's not players turn. This updates to say player's turn is happening. If it's player's turn, allow player to press 1-3 to select move and attack
 		enemyAttack();
 	}
@@ -201,6 +231,8 @@ void Battle::Render(ShaderProgram* program) {
 	state.map->Render(program);
 	state.player->Render(program);
 
+
+	// Draw the UI for the player to select moves from
 	if (state.playerTurn) {
 		Util::DrawText(program, state.text->textureID, "1)" + state.player->moveset[0].getName(), 0.3, 0.03, glm::vec3(1, -5, 0));
 		Util::DrawText(program, state.text->textureID, "Damage:" + std::to_string(state.player->moveset[0].getDamage()), 0.3, 0.03, glm::vec3(6, -5, 0));
@@ -209,8 +241,8 @@ void Battle::Render(ShaderProgram* program) {
 		Util::DrawText(program, state.text->textureID, "3)" + state.player->moveset[2].getName(), 0.3, 0.03, glm::vec3(1, -7, 0));
 		Util::DrawText(program, state.text->textureID, "Damage:" + std::to_string(state.player->moveset[2].getDamage()), 0.3, 0.03, glm::vec3(6, -7, 0));
 
-		Util::DrawText(program, state.text->textureID, "Health:" + std::to_string(static_cast<int>(state.player->health)), 0.3, 0.03, glm::vec3(1, -3, 0));
-		Util::DrawText(program, state.text->textureID, "Health:" + std::to_string(static_cast<int>(state.enemies[0].health)), 0.3, 0.03, glm::vec3(6, -3, 0));
+		Util::DrawText(program, state.text->textureID, "Health:" + std::to_string(static_cast<int>(*(state.player->health))), 0.3, 0.03, glm::vec3(1, -3, 0));
+		Util::DrawText(program, state.text->textureID, "Health:" + std::to_string(static_cast<int>(*(state.enemies[0].health))), 0.3, 0.03, glm::vec3(6, -3, 0));
 	}
 
 	for (int i = 0; i < BATTLE_ENEMY_COUNT; i++) {

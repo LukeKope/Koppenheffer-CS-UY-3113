@@ -1,6 +1,6 @@
 #include "Menu.h"
 
-void Menu::Initialize() {	
+void Menu::MenuInitialize() {
 	// Make sure the next scene is initialized to -1
 	state.nextScene = -1;
 	// Initialize text
@@ -22,10 +22,16 @@ void Menu::Initialize() {
 
 	
 }
+
+// Need this initialize for other levels, but not for menu
+void Menu::Initialize(float* playerHealth, Entity* enemiesAlive, int currEnemyIndex, glm::vec3 playerPosition) {
+	Menu::MenuInitialize();
+}
+
 void Menu::Update(float deltaTime) {	
 	
 }
 void Menu::Render(ShaderProgram* program) {
-	Util::DrawText(program, state.text->textureID, "JRPG", 1.0, -0.5, glm::vec3(-4.25, 0, 0));	
+	Util::DrawText(program, state.text->textureID, "SLIME HUNTER", 1.0, -0.5, glm::vec3(-4.25, 0, 0));	
 	Util::DrawText(program, state.text->textureID, "Press enter to continue!", 0.5, -0.2, glm::vec3(-4.25,-1,0));	
 }

@@ -15,7 +15,7 @@
 #include "Abilities.h"
 #include <vector>
 
-enum EntityType {PLAYER, PLATFORM, ENEMY};
+enum EntityType { PLAYER, PLATFORM, ENEMY };
 enum AIType { WALKER, WAITANDGO, JUMPER, PATROL };
 enum AIState { IDLE, WALKING, ATTACKING };
 
@@ -26,7 +26,7 @@ public:
 	AIType aiType;
 	AIState aiState;
 	// Store player or enemy abilities with member vars of move name, damage, mp.
-	std::vector<Abilities> moveset; 
+	std::vector<Abilities> moveset;
 	glm::vec3 position;
 	glm::vec3 movement;
 	glm::vec3 acceleration;
@@ -39,7 +39,7 @@ public:
 	// track last enemy we collided with so we can remove it from the screen if player kills it
 	Entity* enemyCollidedWith;
 
-	double health;
+	float* health;
 	// Keep track of if an entity gets hit or not
 	bool hit;
 	bool dead;
@@ -75,8 +75,8 @@ public:
 	bool collidedLeft = false;
 	bool collidedRight = false;
 
-	Entity();	
-
+	Entity();
+	
 	bool CheckCollision(Entity* other);
 	void CheckCollisionsY(Entity* objects, int objectCount);
 	void CheckCollisionsX(Entity* objects, int objectCount);

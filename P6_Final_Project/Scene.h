@@ -19,6 +19,7 @@ struct GameState {
 	Entity* player;
 	Entity* enemies;
 	Entity* text;	
+	Entity* lastCollision;
 	int nextScene;
 	bool playerWins = false;
 	// Keep track of whose turn it is in combat
@@ -29,7 +30,7 @@ struct GameState {
 class Scene {
 public:
 	GameState state;
-	virtual void Initialize() = 0;
+	virtual void Initialize(float* playerHealth, Entity* enemiesAlive, int currEnemyIndex, glm::vec3 playerPosition) = 0;
 	virtual void Update(float deltaTime) = 0;
 	virtual void Render(ShaderProgram* program) = 0;
 };

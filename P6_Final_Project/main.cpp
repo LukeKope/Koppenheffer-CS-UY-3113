@@ -29,7 +29,6 @@ main.cpp
 #include "Level1.h"
 #include "Battle.h"
 
-
 SDL_Window* displayWindow;
 bool gameIsRunning = true;
 
@@ -41,18 +40,36 @@ Scene* currentScene;
 Scene* sceneList[3];
 
 // Sound effects
-Mix_Chunk* jump;
+Mix_Chunk* player_attack;
 
 Effects* effects;
 
+
+struct GlobalGameState {
+	Entity* player;
+	// Keep track of all the enemies in the overworld
+	// Pass this vector into the level1 and battle files
+	Entity* enemies;
+	Entity* lastCollision;
+	bool playerWins = false;
+	// On initialization, set playerPosition to center screen
+	glm::vec3 playerPosition = glm::vec3(11, -8, 0);
+	int enemyCount = 2;
+	// Track which enemy the player enters battle with so we can update dead to true for that enemy
+	int enemyBattling = -1;
+	float* player_health = new float(200.0f);
+};
+
+GlobalGameState globalState;
+
 void SwitchToScene(Scene* scene) {
 	currentScene = scene;
-	currentScene->Initialize();
+	currentScene->Initialize(globalState.player_health, globalState.enemies, globalState.enemyBattling, globalState.playerPosition);
 }
 
 void Initialize() {
 	SDL_Init(SDL_INIT_VIDEO);
-	displayWindow = SDL_CreateWindow("JRPG", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_OPENGL);
+	displayWindow = SDL_CreateWindow("Slime Hunter", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_OPENGL);
 	SDL_GLContext context = SDL_GL_CreateContext(displayWindow);
 	SDL_GL_MakeCurrent(displayWindow, context);
 
@@ -78,6 +95,40 @@ void Initialize() {
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	GLuint enemyTextureID = Util::LoadTexture("slime.png");
+
+	// Initialize the global enemies
+	globalState.enemies = new Entity[2];
+
+	// Setting entity Type so we can know what type of object this is when we check for collisions
+	globalState.enemies[0].entityType = ENEMY;
+	// Specifying the type of AI character this entity is
+	globalState.enemies[0].aiType = WALKER;
+	// Specifying the globalState that the AI is in. Is it walking, idle, attacking, etc.
+	globalState.enemies[0].aiState = IDLE;
+	globalState.enemies[0].textureID = enemyTextureID;
+	globalState.enemies[0].position = glm::vec3(5, -2, 0);
+	globalState.enemies[0].speed = 1;
+	globalState.enemies[0].health = new float(100.0f);
+	// name, mp, damage
+	Abilities Punch = Abilities("Punch", 10, 10);
+	Abilities Scratch = Abilities("Scratch", 10, 5);
+
+	globalState.enemies[0].moveset.push_back(Punch);
+	globalState.enemies[0].moveset.push_back(Scratch);
+
+
+	globalState.enemies[1].entityType = ENEMY;
+	globalState.enemies[1].aiType = WAITANDGO;
+	globalState.enemies[1].aiState = IDLE;
+	globalState.enemies[1].textureID = enemyTextureID;
+	globalState.enemies[1].position = glm::vec3(15, -5, 0);
+	globalState.enemies[1].speed = 1;
+	globalState.enemies[1].health = new float(100.0f);
+	// Giving enemy own moveset
+	globalState.enemies[1].moveset.push_back(Punch);
+	globalState.enemies[1].moveset.push_back(Scratch);
+
 	// Initializing our levels and starting at level 1
 	sceneList[0] = new Menu();
 	sceneList[1] = new Level1();
@@ -85,13 +136,13 @@ void Initialize() {
 	SwitchToScene(sceneList[0]);
 
 	// Loading sound
-	jump = Mix_LoadWAV("jump.wav");
+	player_attack = Mix_LoadWAV("jump.wav");
 
 	// Passing in the projection and view matrixes so that it knows the dimension of the window
 	effects = new Effects(projectionMatrix, viewMatrix);
 
 	// Starting the fade in effect immediately
-	effects->Start(FADEIN, 1.0f);
+	effects->Start(FADEIN, 0.2f);
 }
 
 void ProcessInput() {
@@ -119,18 +170,21 @@ void ProcessInput() {
 
 				// FOR THE BATTLE STAGE, ALLOW PLAYER TO SELECT THEIR MOVES
 				if (currentScene == sceneList[2]) {
-					case SDLK_1:
-						// Do move 1
-						currentScene->state.player->currMove = 0;
-						break;
-					case SDLK_2:
-						// Do move 2
-						currentScene->state.player->currMove = 1;
-						break;
-					case SDLK_3:
-						// Do move 3
-						currentScene->state.player->currMove = 2;
-						break;
+			case SDLK_1:
+				// Do move 1
+				currentScene->state.player->currMove = 0;
+				// Play sound effect for attack
+				break;
+			case SDLK_2:
+				// Do move 2
+				currentScene->state.player->currMove = 1;
+				// Play sound effect for attack
+				break;
+			case SDLK_3:
+				// Do move 3
+				currentScene->state.player->currMove = 2;
+				// Play sound effect for attack
+				break;
 				}
 			}
 		}
@@ -144,33 +198,33 @@ void ProcessInput() {
 	if (currentScene == sceneList[1]) {
 
 		if (keys[SDL_SCANCODE_LEFT]) {
-			currentScene->state.player->movement.x = -1.0f;
-			currentScene->state.player->animIndices = currentScene->state.player->animLeft;
+			if (currentScene->state.player->position.x > 1) {
+				currentScene->state.player->movement.x = -1.0f;
+				currentScene->state.player->animIndices = currentScene->state.player->animLeft;
+			}
 		}
 		else if (keys[SDL_SCANCODE_RIGHT]) {
-			currentScene->state.player->movement.x = 1.0f;
-			currentScene->state.player->animIndices = currentScene->state.player->animRight;
+			if (currentScene->state.player->position.x < 20) {
+				currentScene->state.player->movement.x = 1.0f;
+				currentScene->state.player->animIndices = currentScene->state.player->animRight;
+			}
 		}
-		else if (keys[SDL_SCANCODE_UP]) {
-			currentScene->state.player->movement.y = 1.0f;
-			currentScene->state.player->animIndices = currentScene->state.player->animUp;
+		if (keys[SDL_SCANCODE_UP]) {
+			if (currentScene->state.player->position.y < -1) {
+				currentScene->state.player->movement.y = 1.0f;
+				currentScene->state.player->animIndices = currentScene->state.player->animUp;
+			}
 		}
 		else if (keys[SDL_SCANCODE_DOWN]) {
-			currentScene->state.player->movement.y = -1.0f;
-			currentScene->state.player->animIndices = currentScene->state.player->animDown;
+			if (currentScene->state.player->position.y > -14) {
+				currentScene->state.player->movement.y = -1.0f;
+				currentScene->state.player->animIndices = currentScene->state.player->animDown;
+			}
 		}
 
 
 		if (glm::length(currentScene->state.player->movement) > 1.0f) {
 			currentScene->state.player->movement = glm::normalize(currentScene->state.player->movement);
-		}
-	}
-
-	// Defining controls for the battle screen
-	if (currentScene == sceneList[2]) {
-		// Player can navigate a UI and select the move they want to use
-		if (currentScene->state.playerTurn) {
-			// Allow player to select an attack option
 		}
 	}
 
@@ -213,6 +267,28 @@ void Update() {
 	}
 	accumulator = deltaTime;
 
+	// When player collides with an enemy, enter the battle phase
+	// If player collides with an enemy who is NOT dead
+	if (currentScene == sceneList[1]) {
+		if (currentScene->state.player->enemyCollidedWith != nullptr && !currentScene->state.player->enemyCollidedWith->dead && currentScene->state.player->lastCollision == ENEMY) {
+			// Save the enemy we colluded with so we know where to place the player post-battle and which enemy to not render if the player wins
+			globalState.lastCollision = currentScene->state.player->enemyCollidedWith;
+			// Save position to place player post battle
+			globalState.playerPosition = currentScene->state.player->enemyCollidedWith->position;
+
+			for (int i = 0; i < globalState.enemyCount; i++) {
+				if (&globalState.enemies[i] == currentScene->state.player->enemyCollidedWith) {
+					// Search for the enemy in the global state array, once we have the index, store it so that if the player wins, we can set this enemy to dead					
+					globalState.enemyBattling = i;
+				}
+			}
+			// Starting the fade in effect immediately
+			effects->Start(FADEIN, 0.8f);
+			// Enter the battle screen
+			currentScene->state.nextScene = 2;
+		}
+	}
+
 	// Don't have camera track player in the menu
 	if (currentScene != sceneList[0]) {
 		// Updating the camera based on the player x position
@@ -227,19 +303,42 @@ void Update() {
 		}
 	}
 
+/*---------------------------- EFFECTS AND WIN CONDITION CHECKS ----------------------------*/
 	// Our effects will shake the camera view while the shake effect is active
 	viewMatrix = glm::translate(viewMatrix, effects->viewOffset);
 
 	// Constantly check for the player falling off screen and put them back to the start if they fall
 	if (currentScene != sceneList[0]) {
-		// If the player falls off the screen, deduct a life
-		if (currentScene->state.player->health < 0.0f) {
+		// If the player falls off the screen, set player to dead
+		if (*(globalState.player_health) <= 0.0f) {
 			// let the game know the player has died so position can be reset
 			currentScene->state.player->dead = true;
 		}
+		if (*(currentScene->state.enemies[0].health) <= 0.0f) {
+			currentScene->state.enemies[0].dead = true;
+		}
+
+		// Check victory condition (all enemies defeated)
+		int enemiesDefeated = 1;
+		for (int i = 0; i < globalState.enemyCount; i++) {
+			if (globalState.enemies[i].dead) {
+				enemiesDefeated++;
+			}
+		}
+		if (enemiesDefeated == globalState.enemyCount) {
+			// Proceed to the victory screen!
+			effects->Start(FADEOUT, 0.5f);
+			Util::DrawText(&program, currentScene->state.text->textureID, "YOU WIN!", 1.0, -0.5, glm::vec3(-4.25, 0, 0));
+			// currentScene->state.nextScene = 4;
+		}
+
+		if (currentScene->state.player->dead) {
+			// Proceeed to the death screen
+			effects->Start(FADEOUT, 0.5f);
+			Util::DrawText(&program, currentScene->state.text->textureID, "GAME OVER", 1.0, -0.5, glm::vec3(-4.25, 0, 0));
+			// currentScene->state.nextScene = 3;
+		}
 	}
-
-
 
 }
 
