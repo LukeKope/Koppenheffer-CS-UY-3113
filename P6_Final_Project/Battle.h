@@ -15,6 +15,5 @@ public:
 	void playerAttack();
 	void Initialize(float* playerHealth, Entity* globalEnemies, int currEnemyIndex, glm::vec3 playerPosition) override;
 	void Update(float deltaTime) override;
-	// void ProcessInput();
 	void Render(ShaderProgram* program) override;
 };

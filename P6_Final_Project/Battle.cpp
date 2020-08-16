@@ -25,22 +25,19 @@ void Battle::InitPlayer(float* playerHealth) {
 	state.player->entityType = PLAYER;
 	state.player->position = state.startPosition;
 	state.player->movement = glm::vec3(0, 0, 0);
-	// Setting acceleration to gravity
-	//state.player->acceleration = glm::vec3(0, -9.81f, 0);
-	state.player->speed = 4.0f;
 	state.player->health = playerHealth;
 
 	state.player->hit = false;
 
-	state.player->textureID = Util::LoadTexture("george_0.png");
+	state.player->textureID = Util::LoadTexture("character.png");
 
-	state.player->animRight = new int[4]{ 3, 7, 11, 15 };
-	state.player->animLeft = new int[4]{ 1, 5, 9, 13 };
-	state.player->animUp = new int[4]{ 2, 6, 10, 14 };
-	state.player->animDown = new int[4]{ 0, 4, 8, 12 };
+	state.player->animRight = new int[1]{ 3 };
+	state.player->animLeft = new int[1]{ 1 };
+	state.player->animUp = new int[1]{ 2 };
+	state.player->animDown = new int[1]{ 0 };
 
 	state.player->animIndices = state.player->animRight;
-	state.player->animFrames = 4;
+	state.player->animFrames = 0;
 	state.player->animIndex = 0;
 	state.player->animTime = 0;
 	state.player->animCols = 4;
@@ -57,8 +54,9 @@ void Battle::InitPlayer(float* playerHealth) {
 	Abilities Fireball = Abilities("Fireball", 15, 15);
 	Abilities ArcaneLight = Abilities("Arcane Light", 5, 50);
 
-	state.player->moveset.push_back(Lightning);
+
 	state.player->moveset.push_back(Fireball);
+	state.player->moveset.push_back(Lightning);
 	state.player->moveset.push_back(ArcaneLight);
 
 	state.player->currMove = -1;
@@ -70,39 +68,33 @@ void Battle::InitEnemy(Entity* globalEnemies, int currEnemyIndex) {
 	state.enemies = &(globalEnemies[currEnemyIndex]);
 
 	state.enemies->position = glm::vec3(7, -4, 0);
-	state.enemies->aiState = IDLE;
 	// Prevent AI from moving on battle screen
 	state.enemies->speed = 0;
-
-	////Enemy Initialization
-	//state.enemies = new Entity[BATTLE_ENEMY_COUNT];
-	//GLuint enemyTextureID = Util::LoadTexture("slime.png");
-
-	//// Setting entity Type so we can know what type of object this is when we check for collisions
-	//state.enemies[0].entityType = ENEMY;
-	//// Specifying the type of AI character this entity is
-	//// state.enemies[0].aiType = WALKER;
-	//// Specifying the state that the AI is in. Is it walking, idle, attacking, etc.
-	//state.enemies[0].aiState = IDLE;
-	//state.enemies[0].textureID = enemyTextureID;
-	//state.enemies[0].position = glm::vec3(7, -4, 0);
-	//state.enemies[0].speed = 1;
-	//state.enemies[0].hit = false;
-	//state.enemies[0].health = 100;
-
-
-	//// name, mp, damage
-	//Abilities Punch = Abilities("Punch", 10, 10);
-	//Abilities Scratch = Abilities("Scratch", 10, 5);
-
-	//state.enemies[0].moveset.push_back(Punch);
-	//state.enemies[0].moveset.push_back(Scratch);
 }
 
+void Battle::Initialize(float* playerHealth, Entity* globalEnemies, int currEnemyIndex, glm::vec3 playerPosition) {
+	state.playerTurn = false;
+	state.nextScene = -1;
+	state.startPosition = glm::vec3(2, -4, 0);
+
+
+	// Initialize map
+	GLuint mapTextureID = Util::LoadTexture("tileset.png");
+	state.map = new Map(BATTLE_WIDTH, BATTLE_HEIGHT, Battle_data, mapTextureID, 1.0f, 4, 1);
+
+	// Initialize text
+	state.text = new Entity();
+	state.text->textureID = Util::LoadTexture("font1.png");
+
+	// Initialize Player and Enemy
+	InitPlayer(playerHealth);
+	InitEnemy(globalEnemies, currEnemyIndex);
+
+}
 
 void Battle::enemyAttack() {
 	// Define enemy AI behavior for battle phase
-	
+
 
 	int damage = state.enemies[0].moveset[0].getDamage();
 
@@ -145,31 +137,7 @@ void Battle::playerAttack() {
 	state.player->currMove = -1;
 }
 
-void Battle::Initialize(float* playerHealth, Entity* globalEnemies, int currEnemyIndex, glm::vec3 playerPosition) {
-	state.playerTurn = false;
 
-	// Make sure that the next scene is initialized to -1
-	state.nextScene = -1;
-	state.startPosition = glm::vec3(2, -4, 0);
-
-	GLuint mapTextureID = Util::LoadTexture("tileset.png");
-	state.map = new Map(BATTLE_WIDTH, BATTLE_HEIGHT, Battle_data, mapTextureID, 1.0f, 4, 1);
-
-	// Initialize text
-	state.text = new Entity();
-	// Initialize font
-	state.text->textureID = Util::LoadTexture("font1.png");
-
-
-
-	// ------ Initialize Game Objects -----
-
-// Initialize Player
-	InitPlayer(playerHealth);
-
-	InitEnemy(globalEnemies, currEnemyIndex);
-
-}
 
 void Battle::Update(float deltaTime) {
 	state.player->Update(deltaTime, state.player, state.enemies, BATTLE_ENEMY_COUNT, state.map);
@@ -180,7 +148,7 @@ void Battle::Update(float deltaTime) {
 		int enemyTimer = 5000;
 
 		while (enemyTimer != 0) {
-			enemyTimer-=deltaTime;
+			enemyTimer -= deltaTime;
 		}
 		// Call enemy attack when it's not players turn. This updates to say player's turn is happening. If it's player's turn, allow player to press 1-3 to select move and attack
 		enemyAttack();
@@ -202,36 +170,15 @@ void Battle::Update(float deltaTime) {
 }
 
 
-//void Battle::ProcessInput() {
-//	SDL_Event event;
-//	while (SDL_PollEvent(&event)) {
-//		switch (event.type) {		
-//		case SDL_KEYDOWN:
-//			switch (event.key.keysym.sym) {
-//			case SDLK_1:
-//				// Do move 1
-//				playerAttack(state.player->moveset[0]);
-//				break;
-//			case SDLK_2:
-//				// Do move 2
-//				playerAttack(state.player->moveset[1]);
-//				break;
-//			case SDLK_3:
-//				// Do move 3
-//				playerAttack(state.player->moveset[2]);
-//				break;
-//			}
-//		}
-//		break; // SDL_KEYDOWN
-//	}
-//}
-
-
 void Battle::Render(ShaderProgram* program) {
 	state.map->Render(program);
 	state.player->Render(program);
-
-
+	for (int i = 0; i < BATTLE_ENEMY_COUNT; i++) {
+		// Only draw the enemy if it hasn't been killed by the player
+		if (!state.enemies[i].dead) {
+			state.enemies[i].Render(program);
+		}
+	}
 	// Draw the UI for the player to select moves from
 	if (state.playerTurn) {
 		Util::DrawText(program, state.text->textureID, "1)" + state.player->moveset[0].getName(), 0.3, 0.03, glm::vec3(1, -5, 0));
@@ -243,12 +190,5 @@ void Battle::Render(ShaderProgram* program) {
 
 		Util::DrawText(program, state.text->textureID, "Health:" + std::to_string(static_cast<int>(*(state.player->health))), 0.3, 0.03, glm::vec3(1, -3, 0));
 		Util::DrawText(program, state.text->textureID, "Health:" + std::to_string(static_cast<int>(*(state.enemies[0].health))), 0.3, 0.03, glm::vec3(6, -3, 0));
-	}
-
-	for (int i = 0; i < BATTLE_ENEMY_COUNT; i++) {
-		// Only draw the enemy if it hasn't been killed by the player
-		if (!state.enemies[i].dead) {
-			state.enemies[i].Render(program);
-		}
 	}
 }

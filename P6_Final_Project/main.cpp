@@ -54,10 +54,10 @@ struct GlobalGameState {
 	bool playerWins = false;
 	// On initialization, set playerPosition to center screen
 	glm::vec3 playerPosition = glm::vec3(11, -8, 0);
-	int enemyCount = 2;
+	int enemyCount = 4;
 	// Track which enemy the player enters battle with so we can update dead to true for that enemy
 	int enemyBattling = -1;
-	float* player_health = new float(200.0f);
+	float* player_health = new float(210.0f);
 };
 
 GlobalGameState globalState;
@@ -96,10 +96,12 @@ void Initialize() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	GLuint enemyTextureID = Util::LoadTexture("slime.png");
+	GLuint bossEnemyTextureID = Util::LoadTexture("boss_slime.png");
 
 	// Initialize the global enemies
-	globalState.enemies = new Entity[2];
+	globalState.enemies = new Entity[globalState.enemyCount];
 
+// Enemy 1
 	// Setting entity Type so we can know what type of object this is when we check for collisions
 	globalState.enemies[0].entityType = ENEMY;
 	// Specifying the type of AI character this entity is
@@ -117,7 +119,7 @@ void Initialize() {
 	globalState.enemies[0].moveset.push_back(Punch);
 	globalState.enemies[0].moveset.push_back(Scratch);
 
-
+// Enemy 2
 	globalState.enemies[1].entityType = ENEMY;
 	globalState.enemies[1].aiType = WAITANDGO;
 	globalState.enemies[1].aiState = IDLE;
@@ -128,6 +130,29 @@ void Initialize() {
 	// Giving enemy own moveset
 	globalState.enemies[1].moveset.push_back(Punch);
 	globalState.enemies[1].moveset.push_back(Scratch);
+
+// Enemy 3
+	globalState.enemies[2].entityType = ENEMY;
+	globalState.enemies[2].aiType = WAITANDGO;
+	globalState.enemies[2].aiState = IDLE;
+	globalState.enemies[2].textureID = enemyTextureID;
+	globalState.enemies[2].position = glm::vec3(20, -11, 0);
+	globalState.enemies[2].speed = 1;
+	globalState.enemies[2].health = new float(100.0f);
+	// Giving enemy own moveset
+	globalState.enemies[2].moveset.push_back(Punch);
+	globalState.enemies[2].moveset.push_back(Scratch);
+
+// Boss (Stays still)
+	globalState.enemies[3].entityType = ENEMY;
+	globalState.enemies[3].aiState = IDLE;
+	globalState.enemies[3].textureID = bossEnemyTextureID;
+	globalState.enemies[3].position = glm::vec3(3, -14, 0);
+	globalState.enemies[3].speed = 1;
+	globalState.enemies[3].health = new float(200.0f);
+	// Giving enemy own moveset
+	globalState.enemies[3].moveset.push_back(Punch);
+	globalState.enemies[3].moveset.push_back(Scratch);
 
 	// Initializing our levels and starting at level 1
 	sceneList[0] = new Menu();
@@ -352,17 +377,7 @@ void Render() {
 	// Have this so the effect scan use the right program
 	glUseProgram(program.programID);
 	// Render the current scene
-	currentScene->Render(&program);
-
-	if (currentScene != sceneList[0]) {
-
-		// Draw you lose when you lose
-		if (currentScene->state.player->dead) {
-			Util::DrawText(&program, Util::LoadTexture("font1.png"), "Game Over", 0.5, 0.05, glm::vec3(2.5, -2.5, 0));
-		}
-	}
-
-
+	currentScene->Render(&program);	
 
 	// Render the effects last as they're more of an overlay
 	effects->Render();

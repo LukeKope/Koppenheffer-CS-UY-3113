@@ -2,7 +2,7 @@
 #include "Battle.h"
 #include<vector>
 
-#define LEVEL1_ENEMY_COUNT 2
+#define LEVEL1_ENEMY_COUNT 4
 
 #define LEVEL1_WIDTH 22
 #define LEVEL1_HEIGHT 16
@@ -40,19 +40,19 @@ void Level1::InitPlayer(float* playerHealth) {
 	state.player->jumpPower = 6.0f;
 	state.player->health = playerHealth;
 
-	state.player->textureID = Util::LoadTexture("characters.png");
+	state.player->textureID = Util::LoadTexture("character.png");
 
-	/*state.player->animRight = new int[4]{ 20, 21, 22, 23 };
-	state.player->animLeft = new int[4]{ 1, 5, 9, 13 };
-	state.player->animUp = new int[4]{ 2, 6, 10, 14 };
-	state.player->animDown = new int[4]{ 0, 4, 8, 12 };
+	state.player->animRight = new int[1]{ 3 };
+	state.player->animLeft = new int[1]{ 1 };
+	state.player->animUp = new int[1]{ 2 };
+	state.player->animDown = new int[1]{ 0 };
 
-	state.player->animIndices = state.player->animRight;
-	state.player->animFrames = 4;
+	state.player->animIndices = state.player->animDown;
+	state.player->animFrames = 0;
 	state.player->animIndex = 0;
 	state.player->animTime = 0;
 	state.player->animCols = 4;
-	state.player->animRows = 4;*/
+	state.player->animRows = 4;
 
 	// When we checked collisions prior, the sprite appeared to be floating because the sprite actually had a bit of a border around it
 	// We fix this by setting the size of the player sprite
@@ -61,30 +61,9 @@ void Level1::InitPlayer(float* playerHealth) {
 
 }
 
-void Level1::InitEnemies(Entity* globalEnemies) {
-	
+void Level1::InitEnemies(Entity* globalEnemies) {	
 	// Setting a pointer to the global enemies which we manage in main
-	state.enemies = globalEnemies;
-
-	//// Setting entity Type so we can know what type of object this is when we check for collisions
-	//state.enemies[0].entityType = ENEMY;
-	//// Specifying the type of AI character this entity is
-	//state.enemies[0].aiType = WALKER;
-	//// Specifying the state that the AI is in. Is it walking, idle, attacking, etc.
-	//state.enemies[0].aiState = IDLE;
-	//state.enemies[0].textureID = enemyTextureID;
-	//state.enemies[0].position = glm::vec3(5, -2, 0);
-	//state.enemies[0].speed = 1;
-	//state.enemies[0].health = 100.0f;
-
-
-	//state.enemies[1].entityType = ENEMY;
-	//state.enemies[1].aiType = WAITANDGO;
-	//state.enemies[1].aiState = IDLE;
-	//state.enemies[1].textureID = enemyTextureID;
-	//state.enemies[1].position = glm::vec3(15, -5, 0);
-	//state.enemies[1].speed = 1;
-	//state.enemies[1].health = 100.0f;
+	state.enemies = globalEnemies;	
 }
 
 void Level1::Initialize(float* playerHealth, Entity* enemiesAlive, int currEnemyIndex, glm::vec3 playerPosition) {

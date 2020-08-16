@@ -1,3 +1,6 @@
+/* Main overworld that the player can traverse and encounter enemies in
+*/
+
 #include "Scene.h"
 class Level1 : public Scene {
 public:
