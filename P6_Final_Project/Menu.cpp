@@ -15,7 +15,7 @@ void Menu::MenuInitialize() {
 	// Start Audio
 	// Putting it up near the top so that if the game takes a while to load, the music can start playing while the player waits
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
-	bg_music = Mix_LoadMUS("dooblydoo.mp3");
+	bg_music = Mix_LoadMUS("music.mp3");
 	// Loop the music forever
 	Mix_PlayMusic(bg_music, -1);
 	Mix_VolumeMusic(MIX_MAX_VOLUME / 4);

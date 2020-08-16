@@ -43,6 +43,7 @@ Scene* sceneList[5];
 
 // Sound effects
 Mix_Chunk* player_attack;
+Mix_Chunk* fireball;
 
 Effects* effects;
 
@@ -165,7 +166,8 @@ void Initialize() {
 	SwitchToScene(sceneList[0]);
 
 	// Loading sound
-	player_attack = Mix_LoadWAV("jump.wav");
+	player_attack = Mix_LoadWAV("hit_sound.wav");
+	fireball = Mix_LoadWAV("fireball.wav");
 
 	// Passing in the projection and view matrixes so that it knows the dimension of the window
 	effects = new Effects(projectionMatrix, viewMatrix);
@@ -203,24 +205,29 @@ void ProcessInput() {
 				// FOR THE BATTLE STAGE, ALLOW PLAYER TO SELECT THEIR MOVES
 				if (currentScene == sceneList[2]) {
 					currentScene->state.player->currMove = 0;
+					// Play sound effect for fireball											
+					Mix_PlayChannel(-1, fireball, 0);
 				}
-				// Play sound effect for attack
+				
 				break;
 			case SDLK_2:
 				// Do move 2
 				// FOR THE BATTLE STAGE, ALLOW PLAYER TO SELECT THEIR MOVES
 				if (currentScene == sceneList[2]) {
 					currentScene->state.player->currMove = 1;
+					Mix_PlayChannel(-1, player_attack, 1);
 				}
-				// Play sound effect for attack
+				
 				break;
 			case SDLK_3:
 				// Do move 3
 				// FOR THE BATTLE STAGE, ALLOW PLAYER TO SELECT THEIR MOVES
 				if (currentScene == sceneList[2]) {
 					currentScene->state.player->currMove = 2;
+					// Play sound effect for attack
+					Mix_PlayChannel(-1, player_attack, 0);
 				}
-				// Play sound effect for attack
+				
 				break;
 			
 			}
