@@ -28,6 +28,8 @@ main.cpp
 #include "Menu.h"
 #include "Level1.h"
 #include "Battle.h"
+#include "Win_Screen.h"
+#include "Lose_Screen.h"
 
 SDL_Window* displayWindow;
 bool gameIsRunning = true;
@@ -37,7 +39,7 @@ glm::mat4 viewMatrix, modelMatrix, projectionMatrix;
 
 Scene* currentScene;
 // Hold an array of levels and we can point to the current level
-Scene* sceneList[3];
+Scene* sceneList[5];
 
 // Sound effects
 Mix_Chunk* player_attack;
@@ -158,6 +160,8 @@ void Initialize() {
 	sceneList[0] = new Menu();
 	sceneList[1] = new Level1();
 	sceneList[2] = new Battle();
+	sceneList[3] = new Win_Screen();
+	sceneList[4] = new Lose_Screen();
 	SwitchToScene(sceneList[0]);
 
 	// Loading sound
@@ -172,7 +176,7 @@ void Initialize() {
 
 void ProcessInput() {
 	// Have checks in place to not do anything with the player entity in the menu because the player entity does not exist in the menu
-	if (currentScene != sceneList[0]) {
+	if (currentScene != sceneList[0] && currentScene != sceneList[3] && currentScene != sceneList[4]) {
 		currentScene->state.player->movement = glm::vec3(0);
 	}
 	SDL_Event event;
@@ -193,24 +197,32 @@ void ProcessInput() {
 				}
 				break;
 
-				// FOR THE BATTLE STAGE, ALLOW PLAYER TO SELECT THEIR MOVES
-				if (currentScene == sceneList[2]) {
+				
 			case SDLK_1:
 				// Do move 1
-				currentScene->state.player->currMove = 0;
+				// FOR THE BATTLE STAGE, ALLOW PLAYER TO SELECT THEIR MOVES
+				if (currentScene == sceneList[2]) {
+					currentScene->state.player->currMove = 0;
+				}
 				// Play sound effect for attack
 				break;
 			case SDLK_2:
 				// Do move 2
-				currentScene->state.player->currMove = 1;
+				// FOR THE BATTLE STAGE, ALLOW PLAYER TO SELECT THEIR MOVES
+				if (currentScene == sceneList[2]) {
+					currentScene->state.player->currMove = 1;
+				}
 				// Play sound effect for attack
 				break;
 			case SDLK_3:
 				// Do move 3
-				currentScene->state.player->currMove = 2;
+				// FOR THE BATTLE STAGE, ALLOW PLAYER TO SELECT THEIR MOVES
+				if (currentScene == sceneList[2]) {
+					currentScene->state.player->currMove = 2;
+				}
 				// Play sound effect for attack
 				break;
-				}
+			
 			}
 		}
 		break; // SDL_KEYDOWN
@@ -279,7 +291,7 @@ void Update() {
 			effects->Start(SHAKE, 0.1f);
 
 		}
-		if (currentScene != sceneList[0]) {
+		if (currentScene != sceneList[0] && currentScene != sceneList[3] && currentScene != sceneList[4]) {
 			playerHit = currentScene->state.player->hit;
 		}
 
@@ -315,7 +327,7 @@ void Update() {
 	}
 
 	// Don't have camera track player in the menu
-	if (currentScene != sceneList[0]) {
+	if (currentScene != sceneList[0] && currentScene != sceneList[3] && currentScene != sceneList[4]) {
 		// Updating the camera based on the player x position
 		viewMatrix = glm::mat4(1.0f);
 		// If our x coordinate is past 5, then start following him (note how 5 is the player's starting position)
@@ -333,8 +345,7 @@ void Update() {
 	viewMatrix = glm::translate(viewMatrix, effects->viewOffset);
 
 	// Constantly check for the player falling off screen and put them back to the start if they fall
-	if (currentScene != sceneList[0]) {
-		// If the player falls off the screen, set player to dead
+	if (currentScene != sceneList[0] && currentScene != sceneList[3] && currentScene != sceneList[4]) {
 		if (*(globalState.player_health) <= 0.0f) {
 			// let the game know the player has died so position can be reset
 			currentScene->state.player->dead = true;
@@ -344,7 +355,7 @@ void Update() {
 		}
 
 		// Check victory condition (all enemies defeated)
-		int enemiesDefeated = 1;
+		int enemiesDefeated = 0;
 		for (int i = 0; i < globalState.enemyCount; i++) {
 			if (globalState.enemies[i].dead) {
 				enemiesDefeated++;
@@ -352,16 +363,15 @@ void Update() {
 		}
 		if (enemiesDefeated == globalState.enemyCount) {
 			// Proceed to the victory screen!
-			effects->Start(FADEOUT, 0.5f);
-			Util::DrawText(&program, currentScene->state.text->textureID, "YOU WIN!", 1.0, -0.5, glm::vec3(-4.25, 0, 0));
-			// currentScene->state.nextScene = 4;
+			effects->Start(FADEIN, 0.5f);
+			currentScene->state.nextScene = 3;
 		}
 
 		if (currentScene->state.player->dead) {
 			// Proceeed to the death screen
-			effects->Start(FADEOUT, 0.5f);
-			Util::DrawText(&program, currentScene->state.text->textureID, "GAME OVER", 1.0, -0.5, glm::vec3(-4.25, 0, 0));
-			// currentScene->state.nextScene = 3;
+			effects->Start(FADEIN, 0.5f);
+			currentScene->state.nextScene = 4;
+
 		}
 	}
 

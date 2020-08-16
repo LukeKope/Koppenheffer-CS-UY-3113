@@ -132,12 +132,14 @@
     <ClCompile Include="Effects.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="Level1.cpp" />
+    <ClCompile Include="Lose_Screen.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="Util.cpp" />
+    <ClCompile Include="Win_Screen.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Abilities.h" />
@@ -145,11 +147,13 @@
     <ClInclude Include="Effects.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="Level1.h" />
+    <ClInclude Include="Lose_Screen.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="Menu.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="Util.h" />
+    <ClInclude Include="Win_Screen.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="To-Do.txt" />
