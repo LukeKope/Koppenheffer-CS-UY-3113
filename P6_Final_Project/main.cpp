@@ -57,7 +57,7 @@ struct GlobalGameState {
 	bool playerWins = false;
 	// On initialization, set playerPosition to center screen
 	glm::vec3 playerPosition = glm::vec3(11, -8, 0);
-	int enemyCount = 4;
+	int enemyCount = 6;
 	// Track which enemy the player enters battle with so we can update dead to true for that enemy
 	int enemyBattling = -1;
 	float* player_health = new float(210.0f);
@@ -148,6 +148,32 @@ void Initialize() {
 	globalState.enemies[2].moveset.push_back(Punch);
 	globalState.enemies[2].moveset.push_back(Scratch);
 	globalState.enemies[2].moveset.push_back(Slime);
+
+// Enemy 4
+	globalState.enemies[4].entityType = ENEMY;
+	globalState.enemies[4].aiType = WAITANDGO;
+	globalState.enemies[4].aiState = IDLE;
+	globalState.enemies[4].textureID = enemyTextureID;
+	globalState.enemies[4].position = glm::vec3(6, -6, 0);
+	globalState.enemies[4].speed = 1;
+	globalState.enemies[4].health = new float(100.0f);
+	// Giving enemy own moveset
+	globalState.enemies[4].moveset.push_back(Punch);
+	globalState.enemies[4].moveset.push_back(Scratch);
+	globalState.enemies[4].moveset.push_back(Slime);
+
+// Enemy 5
+	globalState.enemies[5].entityType = ENEMY;
+	globalState.enemies[5].aiType = WAITANDGO;
+	globalState.enemies[5].aiState = IDLE;
+	globalState.enemies[5].textureID = enemyTextureID;
+	globalState.enemies[5].position = glm::vec3(19, -9, 0);
+	globalState.enemies[5].speed = 1;
+	globalState.enemies[5].health = new float(100.0f);
+	// Giving enemy own moveset
+	globalState.enemies[5].moveset.push_back(Punch);
+	globalState.enemies[5].moveset.push_back(Scratch);
+	globalState.enemies[5].moveset.push_back(Slime);
 
 // Boss (Stays still)
 

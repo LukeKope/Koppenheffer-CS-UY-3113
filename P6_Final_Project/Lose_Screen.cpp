@@ -20,6 +20,6 @@ void Lose_Screen::Update(float deltaTime) {
 
 }
 void Lose_Screen::Render(ShaderProgram* program) {
-	Util::DrawText(program, state.text->textureID, "GAME OVER", 1.0, 0.2, glm::vec3(1, -1, 0));
-	Util::DrawText(program, state.text->textureID, "The slimes defeated you", 0.5, 0.2, glm::vec3(1, -2, 0));
+	Util::DrawText(program, state.text->textureID, "GAME OVER", 0.8, 0.2, glm::vec3(1, -1, 0));
+	Util::DrawText(program, state.text->textureID, "The slimes defeated you", 0.2, 0.2, glm::vec3(0.5, -2, 0));
 }
