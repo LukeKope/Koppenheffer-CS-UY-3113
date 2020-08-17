@@ -112,7 +112,7 @@ void Initialize() {
 	// Specifying the globalState that the AI is in. Is it walking, idle, attacking, etc.
 	globalState.enemies[0].aiState = IDLE;
 	globalState.enemies[0].textureID = enemyTextureID;
-	globalState.enemies[0].position = glm::vec3(5, -2, 0);
+	globalState.enemies[0].position = glm::vec3(5, -4, 0);
 	globalState.enemies[0].speed = 1;
 	globalState.enemies[0].health = new float(100.0f);
 	// name, mp, damage
@@ -128,7 +128,7 @@ void Initialize() {
 	globalState.enemies[1].aiType = WAITANDGO;
 	globalState.enemies[1].aiState = IDLE;
 	globalState.enemies[1].textureID = enemyTextureID;
-	globalState.enemies[1].position = glm::vec3(15, -5, 0);
+	globalState.enemies[1].position = glm::vec3(15, -6, 0);
 	globalState.enemies[1].speed = 1;
 	globalState.enemies[1].health = new float(100.0f);
 	// Giving enemy own moveset
@@ -225,7 +225,7 @@ void ProcessInput() {
 				// FOR THE BATTLE STAGE, ALLOW PLAYER TO SELECT THEIR MOVES
 				if (currentScene == sceneList[2]) {
 					currentScene->state.player->currMove = 1;
-					Mix_PlayChannel(-1, player_attack, 1);
+					Mix_PlayChannel(-1, player_attack, 0);
 				}
 				
 				break;
@@ -264,13 +264,13 @@ void ProcessInput() {
 			}
 		}
 		if (keys[SDL_SCANCODE_UP]) {
-			if (currentScene->state.player->position.y < -1) {
+			if (currentScene->state.player->position.y < -3) {
 				currentScene->state.player->movement.y = 1.0f;
 				currentScene->state.player->animIndices = currentScene->state.player->animUp;
 			}
 		}
 		else if (keys[SDL_SCANCODE_DOWN]) {
-			if (currentScene->state.player->position.y > -14) {
+			if (currentScene->state.player->position.y > -16) {
 				currentScene->state.player->movement.y = -1.0f;
 				currentScene->state.player->animIndices = currentScene->state.player->animDown;
 			}

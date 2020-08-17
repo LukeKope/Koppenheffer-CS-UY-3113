@@ -1,15 +1,2 @@
-﻿  Battle.cpp
-D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Battle.cpp(197,123): warning C4305: 'argument': truncation from 'double' to 'float'
-D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Battle.cpp(198,146): warning C4305: 'argument': truncation from 'double' to 'float'
-D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Battle.cpp(199,123): warning C4305: 'argument': truncation from 'double' to 'float'
-D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Battle.cpp(200,146): warning C4305: 'argument': truncation from 'double' to 'float'
-D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Battle.cpp(201,123): warning C4305: 'argument': truncation from 'double' to 'float'
-D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Battle.cpp(202,146): warning C4305: 'argument': truncation from 'double' to 'float'
-D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Battle.cpp(205,94): warning C4305: 'argument': truncation from 'double' to 'float'
-D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Battle.cpp(209,160): warning C4305: 'argument': truncation from 'double' to 'float'
-D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Battle.cpp(210,174): warning C4305: 'argument': truncation from 'double' to 'float'
-D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Battle.cpp(215,150): warning C4305: 'argument': truncation from 'double' to 'float'
-D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Battle.cpp(216,153): warning C4305: 'argument': truncation from 'double' to 'float'
-  Entity.cpp
-  Generating Code...
+﻿  main.cpp
   SDLProject.vcxproj -> D:\NYU Classes\Sophomore Summer\Intro to Game Programming\Projects\P6_Final_Project\Debug\SDLProject.exe

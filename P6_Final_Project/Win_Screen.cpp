@@ -6,7 +6,7 @@ void Win_Screen::ScreenInitialize() {
 	// Initialize text
 	state.text = new Entity();
 	// Initialize font
-	state.text->textureID = Util::LoadTexture("font1.png");
+	state.text->textureID = Util::LoadTexture("pixel_font.png");
 }
 
 // Need this initialize for other levels, but not for menu
@@ -18,6 +18,6 @@ void Win_Screen::Update(float deltaTime) {
 
 }
 void Win_Screen::Render(ShaderProgram* program) {
-	Util::DrawText(program, state.text->textureID, "YOU WIN!", 1.0, -0.5, glm::vec3(1, -1, 0));
-	Util::DrawText(program, state.text->textureID, "You defeated the slimes!", 0.5, -0.2, glm::vec3(1, -2, 0));
+	Util::DrawText(program, state.text->textureID, "YOU WIN!", 1.0, 0.2, glm::vec3(1, -1, 0));
+	Util::DrawText(program, state.text->textureID, "You defeated the slimes!", 0.2, 0.2, glm::vec3(0.5, -2, 0));
 }

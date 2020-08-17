@@ -48,6 +48,8 @@ public:
 	float enemyTimer;
 	bool moveChosen;
 
+	Mix_Chunk* attackSound;
+
 	int currMove;
 
 

@@ -32,6 +32,6 @@ void Menu::Update(float deltaTime) {
 	
 }
 void Menu::Render(ShaderProgram* program) {
-	Util::DrawText(program, state.text->textureID, "SLIME HUNTER", 0.8, 0.3, glm::vec3(-4.25, 0, 0));	
-	Util::DrawText(program, state.text->textureID, "Press enter to continue!", 0.5, 0.3, glm::vec3(-4.25,-1,0));	
+	Util::DrawText(program, state.text->textureID, "SLIME HUNTER", 0.5, 0.2, glm::vec3(-4.25, 0, 0));	
+	Util::DrawText(program, state.text->textureID, "Press enter to continue!", 0.2, 0.2, glm::vec3(-4.5,-1,0));	
 }

@@ -14,9 +14,9 @@ unsigned int Battle_data[] =
 	3,0,0,0,0,0,0,0,0,0,3,
 	3,0,0,0,0,0,0,0,0,0,3,
 	3,2,2,2,2,2,2,2,2,2,3,
-	3,2,2,2,2,2,2,2,2,2,3,
-	3,2,2,2,2,2,2,2,2,2,3,
-	3,2,2,2,2,2,2,2,2,2,3
+	3,0,0,0,0,0,0,0,0,0,3,
+	3,0,0,0,0,0,0,0,0,0,3,
+	3,0,0,0,0,0,0,0,0,0,3
 };
 
 void Battle::InitPlayer(float* playerHealth) {
@@ -71,7 +71,8 @@ void Battle::InitEnemy(Entity* globalEnemies, int currEnemyIndex) {
 	// Prevent AI from moving on battle screen
 	state.enemies->speed = 0;
 
-	state.enemies->enemyTimer = 1.5f;
+	// Enemy takes 5 seconds to decide which move to choose
+	state.enemies->enemyTimer = 4.0f;
 }
 
 void Battle::Initialize(float* playerHealth, Entity* globalEnemies, int currEnemyIndex, glm::vec3 playerPosition) {
@@ -79,7 +80,7 @@ void Battle::Initialize(float* playerHealth, Entity* globalEnemies, int currEnem
 	state.nextScene = -1;
 	state.startPosition = glm::vec3(2, -4, 0);
 
-
+	
 
 	// Initialize map
 	GLuint mapTextureID = Util::LoadTexture("tileset.png");
@@ -111,6 +112,11 @@ void Battle::enemyAttack(int moveIndex) {
 
 	// Have a timer so it seems like enemy is thinking/taking time to move
 	// state.player->hit = true;
+
+
+	Mix_Chunk* player_attack;
+	player_attack = Mix_LoadWAV("hit_sound.wav");
+	Mix_PlayChannel(-1, player_attack, 0);
 
 	// Let render know that the enemy has chosen a move so that it can be displayed
 	state.enemies[0].moveChosen = true;
@@ -163,7 +169,7 @@ void Battle::Update(float deltaTime) {
 		// Call enemy attack when it's not players turn. This updates to say player's turn is happening. If it's player's turn, allow player to press 1-3 to select move and attack
 		if (state.enemies[0].enemyTimer <= 0) {
 			enemyAttack(state.enemies[0].currMove);
-			state.enemies[0].enemyTimer = 1.0f;
+			state.enemies[0].enemyTimer = 4.0f;
 		}
 	}
 	else {
@@ -191,20 +197,20 @@ void Battle::Render(ShaderProgram* program) {
 	}
 	// Draw the UI for the player to select moves from
 	if (state.playerTurn) {
-		Util::DrawText(program, state.text->textureID, "1)" + state.player->moveset[0].getName(), 0.3, 0.03, glm::vec3(1, -5, 0));
-		Util::DrawText(program, state.text->textureID, "Damage:" + std::to_string(state.player->moveset[0].getDamage()), 0.3, 0.03, glm::vec3(6, -5, 0));
-		Util::DrawText(program, state.text->textureID, "2)" + state.player->moveset[1].getName(), 0.3, 0.03, glm::vec3(1, -6, 0));
-		Util::DrawText(program, state.text->textureID, "Damage:" + std::to_string(state.player->moveset[1].getDamage()), 0.3, 0.03, glm::vec3(6, -6, 0));
+		Util::DrawText(program, state.text->textureID, "1)" + state.player->moveset[0].getName(), 0.3, 0.03, glm::vec3(1, -6, 0));
+		Util::DrawText(program, state.text->textureID, "Damage:" + std::to_string(state.player->moveset[0].getDamage()), 0.3, 0.03, glm::vec3(6, -6, 0));
+		Util::DrawText(program, state.text->textureID, "2)" + state.player->moveset[1].getName(), 0.3, 0.03, glm::vec3(1, -6.5, 0));
+		Util::DrawText(program, state.text->textureID, "Damage:" + std::to_string(state.player->moveset[1].getDamage()), 0.3, 0.03, glm::vec3(6, -6.5, 0));
 		Util::DrawText(program, state.text->textureID, "3)" + state.player->moveset[2].getName(), 0.3, 0.03, glm::vec3(1, -7, 0));
 		Util::DrawText(program, state.text->textureID, "Damage:" + std::to_string(state.player->moveset[2].getDamage()), 0.3, 0.03, glm::vec3(6, -7, 0));
 	}
 	else {
-		Util::DrawText(program, state.text->textureID, "Enemy Turn", 0.3, 0.03, glm::vec3(3, -5, 0));
+		Util::DrawText(program, state.text->textureID, "Enemy Turn", 0.3, 0.03, glm::vec3(3.5, -6, 0));
 		// Show the name of the move the enemy hits the player with
 
 		if (state.enemies[0].currMove == 0 || state.enemies[0].currMove == 1 || state.enemies[0].currMove == 2) {
-			Util::DrawText(program, state.text->textureID, "Enemy used:" + state.enemies[0].moveset[state.enemies[0].currMove].getName(), 0.2, 0.03, glm::vec3(1, -1, 0));
-			Util::DrawText(program, state.text->textureID, "Damage:" + std::to_string(state.enemies[0].moveset[state.enemies[0].currMove].getDamage()), 0.2, 0.03, glm::vec3(1, -2, 0));
+			Util::DrawText(program, state.text->textureID, "Enemy used:" + state.enemies[0].moveset[state.enemies[0].currMove].getName(), 0.25, 0.03, glm::vec3(1, -7, 0));
+			Util::DrawText(program, state.text->textureID, "Damage:" + std::to_string(state.enemies[0].moveset[state.enemies[0].currMove].getDamage()), 0.25, 0.03, glm::vec3(7, -7, 0));
 		}
 
 	}
