@@ -44,6 +44,10 @@ public:
 	bool hit;
 	bool dead;
 
+	// Add delay to enemy moves to make it appear as if the enemy is thinking
+	float enemyTimer;
+	bool moveChosen;
+
 	int currMove;
 
 

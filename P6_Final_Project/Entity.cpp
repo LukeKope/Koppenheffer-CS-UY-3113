@@ -9,6 +9,8 @@ Entity::Entity()
 	acceleration = glm::vec3(0);
 	velocity = glm::vec3(0);
 	dead = false;
+	currMove = 0;
+	moveChosen = false;
 
 	modelMatrix = glm::mat4(1.0f);
 }

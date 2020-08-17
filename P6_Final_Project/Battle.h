@@ -11,7 +11,7 @@ class Battle : public Scene {
 public:
 	void InitPlayer(float* playerHealth);
 	void InitEnemy(Entity* globalEnemies, int currEnemyIndex);
-	void enemyAttack();
+	void enemyAttack(int moveIndex);
 	void playerAttack();
 	void Initialize(float* playerHealth, Entity* globalEnemies, int currEnemyIndex, glm::vec3 playerPosition) override;
 	void Update(float deltaTime) override;

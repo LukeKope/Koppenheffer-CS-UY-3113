@@ -70,6 +70,8 @@ void Battle::InitEnemy(Entity* globalEnemies, int currEnemyIndex) {
 	state.enemies->position = glm::vec3(7, -4, 0);
 	// Prevent AI from moving on battle screen
 	state.enemies->speed = 0;
+
+	state.enemies->enemyTimer = 1.5f;
 }
 
 void Battle::Initialize(float* playerHealth, Entity* globalEnemies, int currEnemyIndex, glm::vec3 playerPosition) {
@@ -78,13 +80,14 @@ void Battle::Initialize(float* playerHealth, Entity* globalEnemies, int currEnem
 	state.startPosition = glm::vec3(2, -4, 0);
 
 
+
 	// Initialize map
 	GLuint mapTextureID = Util::LoadTexture("tileset.png");
 	state.map = new Map(BATTLE_WIDTH, BATTLE_HEIGHT, Battle_data, mapTextureID, 1.0f, 4, 1);
 
 	// Initialize text
 	state.text = new Entity();
-	state.text->textureID = Util::LoadTexture("font1.png");
+	state.text->textureID = Util::LoadTexture("pixel_font.png");
 
 	// Initialize Player and Enemy
 	InitPlayer(playerHealth);
@@ -92,11 +95,12 @@ void Battle::Initialize(float* playerHealth, Entity* globalEnemies, int currEnem
 
 }
 
-void Battle::enemyAttack() {
+void Battle::enemyAttack(int moveIndex) {
 	// Define enemy AI behavior for battle phase
 
+	// Enemy does a random move from their moveset (This will generate a random number between 0, 1, and 2
 
-	int damage = state.enemies[0].moveset[0].getDamage();
+	int damage = state.enemies[0].moveset[moveIndex].getDamage();
 
 	if (*(state.player->health) - damage <= 0) {
 		state.player->dead = true;
@@ -108,11 +112,20 @@ void Battle::enemyAttack() {
 	// Have a timer so it seems like enemy is thinking/taking time to move
 	// state.player->hit = true;
 
+	// Let render know that the enemy has chosen a move so that it can be displayed
+	state.enemies[0].moveChosen = true;
+
 	// Update and notify that it's the player's turn for combat
 	state.playerTurn = true;
+
+
 }
 
 void Battle::playerAttack() {
+
+	int random_move = rand() % 2;
+	state.enemies[0].currMove = random_move;
+	state.enemies[0].moveChosen = false;
 
 	// currMove changes depending on player input
 	Abilities attack = state.player->moveset[state.player->currMove];
@@ -144,14 +157,14 @@ void Battle::Update(float deltaTime) {
 	state.enemies[0].Update(deltaTime, state.player, state.enemies, BATTLE_ENEMY_COUNT, state.map);
 
 	// In battle phase, enter turn based combat
-	if (!state.playerTurn) {
-		int enemyTimer = 5000;
+	if (!state.playerTurn) {		
 
-		while (enemyTimer != 0) {
-			enemyTimer -= deltaTime;
-		}
+		state.enemies[0].enemyTimer -= deltaTime;
 		// Call enemy attack when it's not players turn. This updates to say player's turn is happening. If it's player's turn, allow player to press 1-3 to select move and attack
-		enemyAttack();
+		if (state.enemies[0].enemyTimer <= 0) {
+			enemyAttack(state.enemies[0].currMove);
+			state.enemies[0].enemyTimer = 1.0f;
+		}
 	}
 	else {
 		if (state.player->currMove != -1) {
@@ -159,11 +172,8 @@ void Battle::Update(float deltaTime) {
 		}
 	}
 
-
-	// CONDITION TO ADVANCE THE PLAYER TO THE NEXT LEVEL (if they're far enough to the right, go to the next level)
+	// CONDITION TO ADVANCE THE PLAYER TO THE NEXT LEVEL (Enemy defeated)
 	if (state.enemies[0].dead) {
-		// Display victory screen
-
 		// this sends a notice to main that we want to change level back to main world (level 1)
 		state.nextScene = 1;
 	}
@@ -187,8 +197,18 @@ void Battle::Render(ShaderProgram* program) {
 		Util::DrawText(program, state.text->textureID, "Damage:" + std::to_string(state.player->moveset[1].getDamage()), 0.3, 0.03, glm::vec3(6, -6, 0));
 		Util::DrawText(program, state.text->textureID, "3)" + state.player->moveset[2].getName(), 0.3, 0.03, glm::vec3(1, -7, 0));
 		Util::DrawText(program, state.text->textureID, "Damage:" + std::to_string(state.player->moveset[2].getDamage()), 0.3, 0.03, glm::vec3(6, -7, 0));
-
-		Util::DrawText(program, state.text->textureID, "Health:" + std::to_string(static_cast<int>(*(state.player->health))), 0.3, 0.03, glm::vec3(1, -3, 0));
-		Util::DrawText(program, state.text->textureID, "Health:" + std::to_string(static_cast<int>(*(state.enemies[0].health))), 0.3, 0.03, glm::vec3(6, -3, 0));
 	}
+	else {
+		Util::DrawText(program, state.text->textureID, "Enemy Turn", 0.3, 0.03, glm::vec3(3, -5, 0));
+		// Show the name of the move the enemy hits the player with
+
+		if (state.enemies[0].currMove == 0 || state.enemies[0].currMove == 1 || state.enemies[0].currMove == 2) {
+			Util::DrawText(program, state.text->textureID, "Enemy used:" + state.enemies[0].moveset[state.enemies[0].currMove].getName(), 0.2, 0.03, glm::vec3(1, -1, 0));
+			Util::DrawText(program, state.text->textureID, "Damage:" + std::to_string(state.enemies[0].moveset[state.enemies[0].currMove].getDamage()), 0.2, 0.03, glm::vec3(1, -2, 0));
+		}
+
+	}
+
+	Util::DrawText(program, state.text->textureID, "Health:" + std::to_string(static_cast<int>(*(state.player->health))), 0.3, 0.03, glm::vec3(1, -3, 0));
+	Util::DrawText(program, state.text->textureID, "Health:" + std::to_string(static_cast<int>(*(state.enemies[0].health))), 0.3, 0.03, glm::vec3(6, -3, 0));
 }

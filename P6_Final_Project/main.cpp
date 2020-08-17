@@ -118,6 +118,7 @@ void Initialize() {
 	// name, mp, damage
 	Abilities Punch = Abilities("Punch", 10, 10);
 	Abilities Scratch = Abilities("Scratch", 10, 5);
+	Abilities Slime = Abilities("Slime", 10, 15);	
 
 	globalState.enemies[0].moveset.push_back(Punch);
 	globalState.enemies[0].moveset.push_back(Scratch);
@@ -133,6 +134,7 @@ void Initialize() {
 	// Giving enemy own moveset
 	globalState.enemies[1].moveset.push_back(Punch);
 	globalState.enemies[1].moveset.push_back(Scratch);
+	globalState.enemies[1].moveset.push_back(Slime);
 
 // Enemy 3
 	globalState.enemies[2].entityType = ENEMY;
@@ -145,17 +147,25 @@ void Initialize() {
 	// Giving enemy own moveset
 	globalState.enemies[2].moveset.push_back(Punch);
 	globalState.enemies[2].moveset.push_back(Scratch);
+	globalState.enemies[2].moveset.push_back(Slime);
 
 // Boss (Stays still)
+
+	// Boss moveset
+	Abilities LavaPunch = Abilities("Lava Punch", 5, 20);
+	Abilities HotSlime = Abilities("Hot Slime", 5, 25);
+	Abilities HeatAttack = Abilities("Heat Attack", 10, 10);
+
 	globalState.enemies[3].entityType = ENEMY;
 	globalState.enemies[3].aiState = IDLE;
 	globalState.enemies[3].textureID = bossEnemyTextureID;
-	globalState.enemies[3].position = glm::vec3(3, -14, 0);
+	globalState.enemies[3].position = glm::vec3(3, -13, 0);
 	globalState.enemies[3].speed = 1;
 	globalState.enemies[3].health = new float(200.0f);
 	// Giving enemy own moveset
-	globalState.enemies[3].moveset.push_back(Punch);
-	globalState.enemies[3].moveset.push_back(Scratch);
+	globalState.enemies[3].moveset.push_back(LavaPunch);
+	globalState.enemies[3].moveset.push_back(HotSlime);
+	globalState.enemies[3].moveset.push_back(HeatAttack);
 
 	// Initializing our levels and starting at level 1
 	sceneList[0] = new Menu();
